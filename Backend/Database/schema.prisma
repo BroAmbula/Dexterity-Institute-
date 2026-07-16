@@ -1,0 +1,143 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// --- USER ACCESS TIERS ---
+enum Role {
+  STUDENT
+  ADMIN
+  SUPER_ADMIN
+}
+
+enum ApplicationStatus {
+  PENDING
+  REVIEWING
+  APPROVED
+  REJECTED
+}
+
+enum PaymentStatus {
+  UNPAID
+  PARTIAL
+  PAID
+  FAILED
+}
+
+enum Currency {
+  USD
+  KES
+}
+
+enum PaymentMethod {
+  MPESA
+  CREDIT_CARD
+  BANK_TRANSFER
+}
+
+model User {
+  id           String        @id @default(uuid())
+  email        String        @unique
+  passwordHash String
+  firstName    String
+  lastName     String
+  phoneNumber  String?
+  role         Role          @default(STUDENT)
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  enrollments  Enrollment[]
+  logs         AuditLog[]
+
+  @@map("users")
+}
+
+// --- INSTITUTIONAL CURRICULUM SCHEMA ---
+model Course {
+  id           String       @id @default(uuid())
+  title        String       @unique
+  school       String       // e.g., "School of CareerCraft", "Eagle's Nest Incubation Hub"
+  tagline      String?      // Nullable for non-CareerCraft schools
+  description  String       @db.Text
+  duration     String
+  deliveryMode String
+  eligibility  String
+  feeUSD       Decimal      @db.Decimal(10, 2)
+  exchangeRate Decimal      @default(130.00) @db.Decimal(10, 2)
+  isActive     Boolean      @default(true)
+  createdAt    DateTime     @default(now())
+  enrollments  Enrollment[]
+
+  @@map("courses")
+}
+
+// --- STUDENT APPLICATIONS & TRANSACTIONS ---
+model Enrollment {
+  id                String            @id @default(uuid())
+  userId            String
+  user              User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  courseId          String
+  course            Course            @relation(fields: [courseId], references: [id], onDelete: Restrict)
+  applicationStatus ApplicationStatus @default(PENDING)
+  paymentStatus     PaymentStatus     @default(UNPAID)
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+  payments          Payment[]
+
+  @@unique([userId, courseId]) // Prevent duplicate applications to the same course
+  @@map("enrollments")
+}
+
+model Payment {
+  id             String        @id @default(uuid())
+  enrollmentId   String
+  enrollment     Enrollment    @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
+  amountPaid     Decimal       @db.Decimal(10, 2)
+  currency       Currency      @default(USD)
+  method         PaymentMethod
+  transactionRef String        @unique // Holds M-Pesa Receipt Number or Card Auth token
+  paidAt         DateTime      @default(now())
+
+  @@map("payments")
+}
+
+// --- MARKETING & LEAD INTAKE SYSTEMS ---
+model PartnerSubmission {
+  id               String   @id @default(uuid())
+  organizationName String
+  contactName      String
+  email            String
+  phone            String
+  message          String   @db.Text
+  isReviewed       Boolean  @default(false)
+  createdAt        DateTime @default(now())
+
+  @@map("partner_submissions")
+}
+
+model ContactSubmission {
+  id         String   @id @default(uuid())
+  name       String
+  email      String
+  subject    String
+  message    String   @db.Text
+  isResolved Boolean  @default(false)
+  createdAt  DateTime @default(now())
+
+  @@map("contact_submissions")
+}
+
+// --- ADMINISTRATIVE SECURITY SYSTEM ---
+model AuditLog {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  action    String   // e.g., "COURSE_UPDATE", "USER_ROLE_CHANGE"
+  details   String   @db.Text
+  createdAt DateTime @default(now())
+
+  @@map("audit_logs")
+}
