@@ -1,4 +1,4 @@
-# 1. Base Image - Must be the first line!
+# 1. Base Image
 FROM php:8.4-fpm
 
 # 2. Install dependencies
@@ -14,14 +14,22 @@ RUN apt-get update && apt-get install -y \
     && docker-php-ext-install gd pdo pdo_pgsql
 
 # 3. Setup
-COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 WORKDIR /var/www
+
+# Install Composer
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+
+# Copy only dependency files first to cache them
+COPY composer.json composer.lock ./
+
+# Install dependencies WITHOUT scripts (This fixes the build crash)
+RUN composer install --no-dev --optimize-autoloader --no-scripts
+
+# Now copy the rest of the app
 COPY . .
 
-# ADD THIS LINE: Clean the cache files before installing dependencies
-RUN rm -f bootstrap/cache/*.php
-
-RUN composer install --no-dev --optimize-autoloader
+# Ensure permissions (Render needs this)
+RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache
 
 # 4. Expose and Run
 EXPOSE 8000
