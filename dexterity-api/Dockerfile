@@ -1,5 +1,7 @@
-FROM php:8.4-fpm
+# Use the CLI version (or default PHP) instead of FPM
+FROM php:8.4-cli
 
+# Install dependencies (same as before)
 RUN apt-get update && apt-get install -y \
     libpng-dev \
     libjpeg-dev \
@@ -15,17 +17,14 @@ WORKDIR /var/www
 
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# Copy dependency files
 COPY composer.json composer.lock ./
 
-# Install with --no-scripts to prevent build-time crashes
 RUN composer install --no-dev --optimize-autoloader --no-scripts
 
-# Copy the rest of the application
 COPY . .
 
-# Ensure storage and cache folders are writable
 RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache
 
-EXPOSE 8000
-CMD php artisan serve --host=0.0.0.0 --port=$PORT
+# Use the built-in PHP web server pointed at the 'public' directory
+# Railway provides the PORT environment variable
+CMD php -S 0.0.0.0:$PORT -t public
