@@ -1,7 +1,7 @@
 # Use PHP 8.4
 FROM php:8.4-fpm
 
-# Install system dependencies, including Node.js and NPM
+# Install system dependencies
 RUN apt-get update && apt-get install -y \
     libpng-dev \
     libjpeg-dev \
@@ -10,8 +10,6 @@ RUN apt-get update && apt-get install -y \
     unzip \
     git \
     libpq-dev \
-    nodejs \
-    npm \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install gd pdo pdo_pgsql
 
@@ -21,15 +19,14 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 # Set working directory
 WORKDIR /var/www
 
-# Copy existing application
+# Copy ONLY your API code (ensure you are only copying the dexterity-api folder)
+# If your Dockerfile is inside the dexterity-api folder, this is fine:
 COPY . .
 
 # Install PHP dependencies
 RUN composer install --no-dev --optimize-autoloader
 
-# Install Node dependencies and Build Assets
-RUN npm install
-RUN npm run build
+# REMOVED: npm install and npm run build lines
 
 # Expose port and start
 EXPOSE 8000
