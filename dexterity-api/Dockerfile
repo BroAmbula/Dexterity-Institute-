@@ -17,6 +17,10 @@ RUN apt-get update && apt-get install -y \
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 WORKDIR /var/www
 COPY . .
+
+# ADD THIS LINE: Clean the cache files before installing dependencies
+RUN rm -f bootstrap/cache/*.php
+
 RUN composer install --no-dev --optimize-autoloader
 
 # 4. Expose and Run
