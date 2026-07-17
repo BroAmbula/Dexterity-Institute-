@@ -15,15 +15,16 @@ WORKDIR /var/www
 
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# Copy only dependency files first
+# Copy dependency files
 COPY composer.json composer.lock ./
 
-# Install dependencies WITH --no-scripts to stop the crash
+# Install with --no-scripts to prevent build-time crashes
 RUN composer install --no-dev --optimize-autoloader --no-scripts
 
+# Copy the rest of the application
 COPY . .
 
-# Ensure permissions
+# Ensure storage and cache folders are writable
 RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache
 
 EXPOSE 8000
