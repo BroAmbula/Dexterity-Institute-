@@ -1,11 +1,13 @@
+// resources/js/App.jsx
 import React from 'react';
-import { createRoot } from 'react-dom/client';
-import App from '../../../App.jsx';
 
-const root = createRoot(document.getElementById('root'));
-root.render(
-    <React.StrictMode>
-        <App />
-    </React.StrictMode>
-);
+function App() {
+    return (
+        <div>
+            <h1>Hello Dexterity Institute!</h1>
+        </div>
+    );
+}
 
+// THIS IS CRITICAL: This line tells Vite "this is the default content of this file"
+export default App;
