@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Menu, X, Phone, Mail } from 'lucide-react';
+import { Menu, X, Phone, Mail, Search } from 'lucide-react';
 
 // Decoupled Front-end Sub-page imports
 import LandingPage from './LandingPage';
@@ -10,11 +10,19 @@ import EventsPage from './EventsPage';
 import PartnerWithUs from './PartnerWithUs';
 import ContactPage from './ContactPage';
 import FAQPage from './FAQPage';
+import Register from './Register';
+import SuperAdminRegister from './SuperAdminRegister';
 import { StudentLogin, AdminLogin, SuperAdminLogin } from './AuthPages';
+
+// Linked Student Sub-pages
+import StudentDashboard from './Student/StudentDashboard';
+import CourseCatalog from './Student/CourseCatalog';
+import PaymentPortal from './Student/PaymentPortal';
 
 export default function App() {
   const [currentView, setCurrentView] = useState('home');
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [userRole, setUserRole] = useState(null); // Tracks 'student', 'admin', or 'super-admin'
 
   const links = [
     { label: 'Home', id: 'home' },
@@ -28,9 +36,33 @@ export default function App() {
   ];
 
   const handleNavigation = (viewId) => {
+    // Protection Logic: Block student pages unless logged in as a student
+    const studentRoutes = ['student-dashboard', 'student-courses', 'student-payments'];
+    if (studentRoutes.includes(viewId) && userRole !== 'student') {
+      alert("Access Denied: Please log in to access the Student Portal.");
+      return;
+    }
+    
+    // Protection Logic: Block admin areas unless authorized
+    if (viewId.includes('admin') && viewId !== 'admin-login' && viewId !== 'super-admin-login') {
+      if (userRole !== 'admin' && userRole !== 'super-admin') {
+        alert("Access Denied: Please log in as an administrator.");
+        return;
+      }
+    }
+    
     setCurrentView(viewId);
     setMobileOpen(false);
     window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleLogin = (role) => {
+    setUserRole(role);
+    if (role === 'student') {
+      handleNavigation('student-dashboard'); // Redirect student directly to their custom Dashboard
+    } else {
+      handleNavigation('home'); 
+    }
   };
 
   const renderActiveView = () => {
@@ -43,9 +75,19 @@ export default function App() {
       case 'partner': return <PartnerWithUs onNavigate={handleNavigation} />;
       case 'contact': return <ContactPage onNavigate={handleNavigation} />;
       case 'faq': return <FAQPage onNavigate={handleNavigation} />;
-      case 'student-login': return <StudentLogin onNavigate={handleNavigation} />;
-      case 'admin-login': return <AdminLogin onNavigate={handleNavigation} />;
-      case 'super-admin-login': return <SuperAdminLogin onNavigate={handleNavigation} />;
+      case 'register': return <Register onNavigate={handleNavigation} onRegisterSuccess={() => handleNavigation('student-login')} />;
+      case 'super-admin-register': return <SuperAdminRegister onNavigate={handleNavigation} onRegisterSuccess={() => handleNavigation('super-admin-login')} />;
+      
+      // Linked Student Pages (rendered dynamically under App routing)
+      case 'student-dashboard': return <StudentDashboard onNavigate={handleNavigation} />;
+      case 'student-courses': return <CourseCatalog onNavigate={handleNavigation} />;
+      case 'student-payments': return <PaymentPortal onNavigate={handleNavigation} />;
+      
+      // Portals
+      case 'student-login': return <StudentLogin onNavigate={handleNavigation} onLogin={() => handleLogin('student')} />;
+      case 'admin-login': return <AdminLogin onNavigate={handleNavigation} onLogin={() => handleLogin('admin')} />;
+      case 'super-admin-login': return <SuperAdminLogin onNavigate={handleNavigation} onLogin={() => handleLogin('super-admin')} />;
+      
       default: return <LandingPage onNavigate={handleNavigation} />;
     }
   };
@@ -53,11 +95,15 @@ export default function App() {
   return (
     <div className="min-h-screen flex flex-col justify-between bg-white text-slate-800 antialiased">
       
-      {/* Dynamic Navigation Header */}
       <header className="bg-white border-b sticky top-0 z-50 px-6 sm:px-8 py-4 flex items-center justify-between">
         <div className="flex items-center gap-2 cursor-pointer" onClick={() => handleNavigation('home')}>
-          <div className="w-8 h-8 bg-blue-900 rounded-xl flex items-center justify-center text-white font-black text-sm">D</div>
+          <img src="/logo.png" alt="Dexterity Initiative" className="h-8 w-auto" />
           <span className="font-black text-lg text-blue-900 tracking-tight">Dexterity Initiative</span>
+        </div>
+
+        <div className="hidden lg:flex relative max-w-xs w-full mx-6">
+          <Search className="absolute left-3 top-2.5 text-slate-400" size={16} />
+          <input type="text" placeholder="Search..." className="w-full pl-9 pr-4 py-2 rounded-full border border-slate-200 bg-slate-50 text-xs focus:ring-2 focus:ring-blue-500 outline-none transition" />
         </div>
 
         <div className="hidden xl:flex items-center space-x-6 text-xs font-bold uppercase tracking-wider">
@@ -88,64 +134,19 @@ export default function App() {
                 {l.label}
               </button>
             ))}
-            <div className="grid grid-cols-2 gap-3 pt-4">
-              <button onClick={() => handleNavigation('partner')} className="bg-red-600 text-white py-2.5 rounded-lg text-xs font-bold text-center">Partner</button>
-              <button onClick={() => handleNavigation('student-login')} className="border text-slate-700 py-2.5 rounded-lg text-xs font-bold text-center">Portals</button>
-            </div>
           </div>
         )}
       </header>
 
-      {/* Main Container Render Slot */}
       <main className="flex-grow">
         {renderActiveView()}
       </main>
 
-      {/* Core Footer Segment with Mandatory Statement */}
       <footer className="bg-[#0a0b14] text-slate-400 py-16 px-6 sm:px-8 border-t border-slate-950">
-        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-12 mb-12 text-sm">
-          <div className="space-y-4">
-            <h3 className="text-white font-extrabold text-base">Dexterity Initiative</h3>
-            <div className="text-xs space-y-1.5 font-medium">
-              <p className="flex items-center gap-2"><Phone size={14} className="text-red-500" /> +254 726 503 062</p>
-              <p className="flex items-center gap-2"><Mail size={14} className="text-red-500" /> info@dexterityinitiative.org</p>
-            </div>
-          </div>
-          <div>
-            <h4 className="text-white font-bold text-xs uppercase tracking-wider mb-4">Navigation Links</h4>
-            <ul className="space-y-2 text-xs">
-              <li><button onClick={() => handleNavigation('about')} className="hover:text-white transition">Faculty Team</button></li>
-              <li><button onClick={() => handleNavigation('courses')} className="hover:text-white transition">Course Catalogs</button></li>
-              <li><button onClick={() => handleNavigation('faq')} className="hover:text-white transition">Help Desk & FAQs</button></li>
-            </ul>
-          </div>
-          <div>
-            <h4 className="text-white font-bold text-xs uppercase tracking-wider mb-4">Secure Entry Portals</h4>
-            <ul className="space-y-2 text-xs">
-              <li><button onClick={() => handleNavigation('student-login')} className="hover:text-white transition">Student Portal</button></li>
-              <li><button onClick={() => handleNavigation('admin-login')} className="hover:text-white transition">Staff Management Console</button></li>
-              <li><button onClick={() => handleNavigation('super-admin-login')} className="hover:text-white transition">Super Override Admin</button></li>
-            </ul>
-          </div>
-          <div className="space-y-3">
-            <h4 className="text-white font-bold text-xs uppercase tracking-wider">Institution Trimester</h4>
-            <p className="text-xs text-slate-400 leading-relaxed">Coordinate localized training models or process curriculum onboarding with our directors.</p>
-            <button onClick={() => handleNavigation('partner')} className="w-full bg-red-600 hover:bg-red-700 text-white text-xs font-bold py-2.5 rounded-lg transition shadow-md">Partner Action Form</button>
-          </div>
-        </div>
-
-        {/* MANDATORY LEGAL DISCLOSURE FOOTER STATEMENT */}
-        <div className="max-w-7xl mx-auto pt-8 border-t border-slate-900/60 space-y-4">
-          <p className="text-xs text-slate-500 font-medium leading-relaxed text-justify">
-            Dexterity Initiative is the public-facing name of Dexterity Lifeskills Initiative CLG, a non-profit company registered in Kenya. Dexterity Lifeskills Institute is its training and commercial arm, responsible for developing, publishing, and managing the intellectual property used in its training programmes, publications, and educational resources.
-          </p>
-          <div className="text-[10px] text-slate-600 flex flex-col sm:flex-row justify-between items-center pt-2">
-            <p>© 2026 Dexterity Initiative. All operational rights reserved.</p>
-            <p className="tracking-wide">System Deployment Status: Production Frontend Complete</p>
-          </div>
+        <div className="max-w-7xl mx-auto text-center text-xs">
+          <p>© 2026 Dexterity Initiative. All rights reserved.</p>
         </div>
       </footer>
-
     </div>
   );
 }

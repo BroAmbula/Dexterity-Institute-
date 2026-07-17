@@ -1,0 +1,11 @@
+{
+  "name": "dexterity-workspace",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "concurrently \"cd Frontend && npm run dev\" \"cd dexterity-api && php artisan serve\""
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
