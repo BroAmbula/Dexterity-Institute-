@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { Search, Clock, BarChart, GraduationCap, ChevronRight, Filter, ShieldCheck, X, DollarSign, Smartphone } from 'lucide-react';
 
-export default function CoursePage() {
+export default function CoursePage({ onNavigate }) {
   const [activeTab, setActiveTab] = useState('All');
   const [selectedCourse, setSelectedCourse] = useState(null);
-  const [currencyInKES, setCurrencyInKES] = useState(true); // Default true since user base is in Kenya
+  const [currencyInKES, setCurrencyInKES] = useState(true);
 
   const schools = [
     'All',
@@ -25,7 +25,7 @@ export default function CoursePage() {
       deliveryMode: "In-Person Workshops",
       eligibility: "Primary School Students (Ages 9-12)",
       feeUSD: 40,
-      exchangeRate: 130, // 1 USD = 130 KES approximate
+      exchangeRate: 130,
       description: "Early childhood self-awareness discovery, foundational curiosity building, and cognitive interest mapping frameworks tailored for younger minds."
     },
     {
@@ -338,7 +338,7 @@ export default function CoursePage() {
           </div>
         </div>
 
-        {/* Grid Display (PRICES NOT DISPLAYED HERE) */}
+        {/* Grid Display */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {filteredCourses.map((course) => (
             <div key={course.id} className="bg-white rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between hover:shadow-md transition">
@@ -356,7 +356,6 @@ export default function CoursePage() {
                 
                 <p className="text-sm text-slate-600 leading-relaxed line-clamp-3">{course.description}</p>
                 
-                {/* Meta details hidden display */}
                 <div className="grid grid-cols-2 gap-4 pt-4 border-t border-slate-100 text-xs font-medium text-slate-500">
                   <div className="flex items-center gap-2">
                     <Clock size={16} className="text-blue-900" />
@@ -428,7 +427,7 @@ export default function CoursePage() {
                 </div>
               </div>
 
-              {/* FEES DISPLAY ZONE WITH REGIONAL TOGGLE BLOCK */}
+              {/* FEES DISPLAY ZONE */}
               <div className="border-t border-slate-100 pt-6 space-y-4">
                 <div className="flex justify-between items-center bg-blue-50/50 p-4 rounded-2xl border border-blue-100/50">
                   <div>
@@ -442,7 +441,6 @@ export default function CoursePage() {
                     </p>
                   </div>
 
-                  {/* Automatic Kenyan Conversion Component M-Pesa Hook */}
                   <button 
                     onClick={() => setCurrencyInKES(!currencyInKES)}
                     className="bg-white border border-slate-200 text-slate-700 px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-slate-100 transition shadow-xs flex items-center gap-1.5"
@@ -472,7 +470,7 @@ export default function CoursePage() {
                 Cancel
               </button>
               <button 
-                onClick={() => alert(`Redirecting to secure application gateway for: ${selectedCourse.title}`)}
+                onClick={() => onNavigate('student-payments')}
                 className="w-full bg-red-600 hover:bg-red-700 text-white font-bold text-sm py-3 rounded-xl transition text-center shadow-md flex items-center justify-center gap-1"
               >
                 Proceed to Apply <ChevronRight size={16} />
@@ -482,7 +480,6 @@ export default function CoursePage() {
           </div>
         </div>
       )}
-
     </div>
   );
 }
