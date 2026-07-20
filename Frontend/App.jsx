@@ -26,6 +26,7 @@ export default function App() {
   const [currentView, setCurrentView] = useState(() => localStorage.getItem('currentView') || 'home');
   const [userRole, setUserRole] = useState(() => localStorage.getItem('user_role') || null);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [selectedCourse, setSelectedCourse] = useState(null); // Added for course data persistence
 
   const links = [
     { label: 'Home', id: 'home' },
@@ -38,7 +39,10 @@ export default function App() {
     { label: 'FAQs', id: 'faq' }
   ];
 
-  const handleNavigation = (viewId) => {
+  const handleNavigation = (viewId, data = null) => {
+    // If data (the course object) is passed, save it to state
+    if (data) setSelectedCourse(data);
+
     // Protection Logic
     const studentRoutes = ['student-dashboard', 'student-courses', 'student-payments'];
     
@@ -100,7 +104,8 @@ export default function App() {
       // Linked Student Pages
       case 'student-dashboard': return <StudentDashboard onNavigate={handleNavigation} />;
       case 'student-courses': return <CourseCatalog onNavigate={handleNavigation} />;
-      case 'student-payments': return <PaymentPortal onNavigate={handleNavigation} />;
+      // Pass the selectedCourse as a prop to the PaymentPortal
+      case 'student-payments': return <PaymentPortal onNavigate={handleNavigation} course={selectedCourse} />;
       
       // Portals
       case 'student-login': return <StudentLogin onNavigate={handleNavigation} onLogin={handleLogin} />;
@@ -139,7 +144,6 @@ export default function App() {
             Partner With Us
           </button>
           
-          {/* Dynamic Login/Logout UI */}
           {!userRole ? (
             <button onClick={() => handleNavigation('student-login')} className="text-slate-700 border border-slate-300 px-4 py-2 rounded-lg text-xs font-bold hover:bg-slate-50 transition">
               Portal Logins

@@ -469,8 +469,10 @@ export default function CoursePage({ onNavigate }) {
               >
                 Cancel
               </button>
+              
+              {/* FIXED: Passing selectedCourse as second argument */}
               <button 
-                onClick={() => onNavigate('student-payments')}
+                onClick={() => onNavigate('student-payments', selectedCourse)}
                 className="w-full bg-red-600 hover:bg-red-700 text-white font-bold text-sm py-3 rounded-xl transition text-center shadow-md flex items-center justify-center gap-1"
               >
                 Proceed to Apply <ChevronRight size={16} />
