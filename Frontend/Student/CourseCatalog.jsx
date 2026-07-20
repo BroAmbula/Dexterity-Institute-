@@ -11,7 +11,8 @@ export default function CourseCatalog() {
     const fetchActiveCourses = async () => {
       try {
         const token = localStorage.getItem('dex_token');
-        const response = await fetch('http://localhost:8000/api/student/active-courses', {
+        const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'https://dexterity-institute-production.up.railway.app';
+        const response = await fetch(`${apiBaseUrl}/api/student/active-courses`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
@@ -44,7 +45,8 @@ export default function CourseCatalog() {
 
     try {
       const token = localStorage.getItem('dex_token');
-      const response = await fetch('http://localhost:8000/api/student/apply', {
+      const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'https://dexterity-institute-production.up.railway.app';
+      const response = await fetch(`${apiBaseUrl}/api/student/apply`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

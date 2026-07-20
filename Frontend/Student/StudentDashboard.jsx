@@ -10,7 +10,8 @@ export default function StudentDashboard() {
     const fetchMyTracks = async () => {
       try {
         const token = localStorage.getItem('dex_token');
-        const response = await fetch('http://localhost:8000/api/student/my-tracks', {
+        const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'https://dexterity-institute-production.up.railway.app';
+        const response = await fetch(`${apiBaseUrl}/api/student/my-tracks`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
