@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Menu, X, Search } from 'lucide-react';
+import { getApiBaseUrl } from './apiConfig';
 
-// Decoupled Front-end Sub-page imports
+// Pages
 import LandingPage from './LandingPage';
 import AboutPage from './AboutPage';
 import CoursePage from './CoursePage';
@@ -13,8 +14,6 @@ import FAQPage from './FAQPage';
 import Register from './Register';
 import SuperAdminRegister from './SuperAdminRegister';
 import { StudentLogin, AdminLogin, SuperAdminLogin } from './AuthPages';
-
-// Linked Student Sub-pages
 import StudentDashboard from './Student/StudentDashboard';
 import CourseCatalog from './Student/CourseCatalog';
 import PaymentPortal from './Student/PaymentPortal';
@@ -22,45 +21,46 @@ import AdminDashboard from './Admin/AdminDashboard';
 import SuperAdminDashboard from './SuperAdmin/SuperAdminDashboard';
 
 export default function App() {
-  // Initialize state directly from localStorage to prevent reset on refresh
   const [currentView, setCurrentView] = useState(() => localStorage.getItem('currentView') || 'home');
   const [userRole, setUserRole] = useState(() => localStorage.getItem('user_role') || null);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [selectedCourse, setSelectedCourse] = useState(null); // Added for course data persistence
+  const [selectedCourse, setSelectedCourse] = useState(null);
+  const [enrolledCourses, setEnrolledCourses] = useState([]);
+
+  // Fetch data for student dashboard
+  useEffect(() => {
+    if (userRole === 'student') {
+      const fetchTracks = async () => {
+        try {
+          const token = localStorage.getItem('token');
+          const response = await fetch(`${getApiBaseUrl()}/api/student/my-tracks`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+          });
+          const data = await response.json();
+          if (response.ok) setEnrolledCourses(data);
+        } catch (err) { console.error("Error fetching tracks", err); }
+      };
+      fetchTracks();
+    }
+  }, [userRole]);
 
   const links = [
-    { label: 'Home', id: 'home' },
-    { label: 'About Us', id: 'about' },
-    { label: 'Courses', id: 'courses' },
-    { label: 'Publications', id: 'blogs' },
-    { label: 'Events', id: 'events' },
-    { label: 'Partner', id: 'partner' },
-    { label: 'Contact', id: 'contact' },
-    { label: 'FAQs', id: 'faq' }
+    { label: 'Home', id: 'home' }, { label: 'About Us', id: 'about' },
+    { label: 'Courses', id: 'courses' }, { label: 'Publications', id: 'blogs' },
+    { label: 'Events', id: 'events' }, { label: 'Partner', id: 'partner' },
+    { label: 'Contact', id: 'contact' }, { label: 'FAQs', id: 'faq' }
   ];
 
   const handleNavigation = (viewId, data = null) => {
-    // If data (the course object) is passed, save it to state
     if (data) setSelectedCourse(data);
-
-    // Protection Logic
-    const studentRoutes = ['student-dashboard', 'student-courses', 'student-payments'];
     
-    if (studentRoutes.includes(viewId)) {
-      if (userRole !== 'student') {
+    // Security check
+    const studentRoutes = ['student-dashboard', 'student-courses', 'student-payments'];
+    if (studentRoutes.includes(viewId) && userRole !== 'student') {
         alert("Access Denied: Please log in to access the Student Portal.");
         return;
-      }
     }
-    
-    if (viewId.includes('admin') && viewId !== 'admin-login' && viewId !== 'super-admin-login') {
-      if (userRole !== 'admin' && userRole !== 'super-admin') {
-        alert("Access Denied: Please log in as an administrator.");
-        return;
-      }
-    }
-    
-    // Save state to localStorage
+
     localStorage.setItem('currentView', viewId);
     setCurrentView(viewId);
     setMobileOpen(false);
@@ -70,16 +70,9 @@ export default function App() {
   const handleLogin = (role) => {
     setUserRole(role);
     localStorage.setItem('user_role', role); 
-    
-    if (role === 'student') {
-      handleNavigation('student-dashboard');
-    } else if (role === 'admin') {
-      handleNavigation('admin-dashboard');
-    } else if (role === 'super-admin') {
-      handleNavigation('super-admin-dashboard');
-    } else {
-      handleNavigation('home');
-    }
+    if (role === 'student') handleNavigation('student-dashboard');
+    else if (role === 'admin') handleNavigation('admin-dashboard');
+    else handleNavigation('home');
   };
 
   const handleLogout = () => {
@@ -99,21 +92,11 @@ export default function App() {
       case 'contact': return <ContactPage onNavigate={handleNavigation} />;
       case 'faq': return <FAQPage onNavigate={handleNavigation} />;
       case 'register': return <Register onNavigate={handleNavigation} onRegisterSuccess={() => handleNavigation('student-login')} />;
-      case 'super-admin-register': return <SuperAdminRegister onNavigate={handleNavigation} onRegisterSuccess={() => handleNavigation('super-admin-login')} />;
-      
-      // Linked Student Pages
-      case 'student-dashboard': return <StudentDashboard onNavigate={handleNavigation} />;
+      case 'student-dashboard': return <StudentDashboard onNavigate={handleNavigation} enrolledCourses={enrolledCourses} />;
       case 'student-courses': return <CourseCatalog onNavigate={handleNavigation} />;
-      // Pass the selectedCourse as a prop to the PaymentPortal
       case 'student-payments': return <PaymentPortal onNavigate={handleNavigation} course={selectedCourse} />;
-      
-      // Portals
       case 'student-login': return <StudentLogin onNavigate={handleNavigation} onLogin={handleLogin} />;
-      case 'admin-login': return <AdminLogin onNavigate={handleNavigation} onLogin={handleLogin} />;
-      case 'super-admin-login': return <SuperAdminLogin onNavigate={handleNavigation} onLogin={handleLogin} />;
       case 'admin-dashboard': return <AdminDashboard onNavigate={handleNavigation} />;
-      case 'super-admin-dashboard': return <SuperAdminDashboard onNavigate={handleNavigation} />;
-      
       default: return <LandingPage onNavigate={handleNavigation} />;
     }
   };
@@ -143,7 +126,6 @@ export default function App() {
           <button onClick={() => handleNavigation('partner')} className="bg-red-600 text-white px-4 py-2 rounded-lg text-xs font-bold hover:bg-red-700 transition shadow-xs">
             Partner With Us
           </button>
-          
           {!userRole ? (
             <button onClick={() => handleNavigation('student-login')} className="text-slate-700 border border-slate-300 px-4 py-2 rounded-lg text-xs font-bold hover:bg-slate-50 transition">
               Portal Logins
@@ -170,9 +152,7 @@ export default function App() {
         )}
       </header>
 
-      <main className="flex-grow">
-        {renderActiveView()}
-      </main>
+      <main className="flex-grow">{renderActiveView()}</main>
 
       <footer className="bg-[#0a0b14] text-slate-400 py-16 px-6 sm:px-8 border-t border-slate-950">
         <div className="max-w-7xl mx-auto text-center text-xs">
