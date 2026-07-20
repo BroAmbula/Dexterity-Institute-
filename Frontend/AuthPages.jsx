@@ -156,7 +156,11 @@ export const SuperAdminLogin = ({ onNavigate, onLogin }) => {
     try {
       const data = await apiRequest('/api/login', {
         method: 'POST',
-        body: JSON.stringify({ email, password })
+        body: JSON.stringify({ 
+            email, 
+            password, 
+            securityCode // FIXED: securityCode is now sent to the server
+        })
       });
       completeLogin(data, onLogin);
     } catch (err) {
