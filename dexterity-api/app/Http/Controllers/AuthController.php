@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Log;
 
 class AuthController extends Controller
 {
@@ -23,7 +24,6 @@ class AuthController extends Controller
             'password' => 'required|string|min:8|confirmed',
         ]);
 
-        // Guard against registration exploits: standard signups ALWAYS default to STUDENT
         $user = User::create([
             'first_name' => $fields['first_name'],
             'last_name' => $fields['last_name'],
@@ -34,10 +34,8 @@ class AuthController extends Controller
             'status' => 'ACTIVE',
         ]);
 
-        // Trigger the email verification process
         $this->sendVerificationCode($user->email);
 
-        // Return the response after the logic is complete
         return response()->json([
             'message' => 'Account created. A verification code has been sent to your email address.',
             'email' => $user->email,
@@ -96,6 +94,18 @@ class AuthController extends Controller
 
         // Attempt to find user
         $user = User::where('email', $fields['email'])->first();
+
+        // ADDED LOGGING FOR DEBUGGING
+        if ($user) {
+            $isMatch = Hash::check($fields['password'], $user->password);
+            Log::info('Login Attempt', [
+                'email' => $fields['email'],
+                'password_match' => $isMatch,
+                'stored_hash' => $user->password
+            ]);
+        } else {
+            Log::info('Login Attempt: User not found', ['email' => $fields['email']]);
+        }
 
         if (!$user || !Hash::check($fields['password'], $user->password)) {
             return response()->json([
