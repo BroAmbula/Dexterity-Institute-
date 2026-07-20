@@ -10,7 +10,13 @@ export default function StudentDashboard() {
   useEffect(() => {
     const fetchMyTracks = async () => {
       try {
-        const token = localStorage.getItem('dex_token');
+        // FIXED: Using 'token' to match what we saved in Register.jsx
+        const token = localStorage.getItem('token');
+        
+        if (!token) {
+          throw new Error('No authentication token found. Please log in.');
+        }
+
         const apiBaseUrl = getApiBaseUrl();
         const response = await fetch(`${apiBaseUrl}/api/student/my-tracks`, {
           method: 'GET',
@@ -41,7 +47,7 @@ export default function StudentDashboard() {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50 text-gray-400 font-semibold">
-        Syncing academic records with Supabase...
+        Syncing academic records with the server...
       </div>
     );
   }
@@ -54,7 +60,7 @@ export default function StudentDashboard() {
         <div className="mb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div>
             <h1 className="text-3xl font-extrabold text-gray-950">
-              Welcome back, {localStorage.getItem('dex_user_name') || 'Student'}!
+              Welcome back!
             </h1>
             <p className="text-gray-500">Track your current application files, school fees, and program modules.</p>
           </div>
@@ -96,7 +102,6 @@ export default function StudentDashboard() {
                       </div>
                     </div>
 
-                    {/* Program Metrics */}
                     <div className="grid grid-cols-2 gap-4 border-t border-b border-gray-50 py-4 my-4">
                       <div>
                         <span className="text-xs text-gray-400 font-semibold uppercase">Admission</span>
@@ -117,7 +122,6 @@ export default function StudentDashboard() {
                     </div>
                   </div>
 
-                  {/* Direct Action Conditional CTA */}
                   <div className="mt-2">
                     {item.application_status === 'APPROVED' && item.payment_status === 'UNPAID' ? (
                       <div className="flex items-center justify-between gap-4 bg-red-50/50 p-3 rounded-xl border border-red-100/50">
@@ -149,7 +153,6 @@ export default function StudentDashboard() {
             })}
           </div>
         )}
-
       </div>
     </div>
   );

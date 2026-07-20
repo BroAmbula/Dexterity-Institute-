@@ -22,19 +22,10 @@ import AdminDashboard from './Admin/AdminDashboard';
 import SuperAdminDashboard from './SuperAdmin/SuperAdminDashboard';
 
 export default function App() {
-  const [currentView, setCurrentView] = useState('home');
+  // Initialize state directly from localStorage to prevent reset on refresh
+  const [currentView, setCurrentView] = useState(() => localStorage.getItem('currentView') || 'home');
+  const [userRole, setUserRole] = useState(() => localStorage.getItem('user_role') || null);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [userRole, setUserRole] = useState(null);
-
-  // Restore user session on page load
-  useEffect(() => {
-    const token = localStorage.getItem('token');
-    const storedRole = localStorage.getItem('user_role');
-    
-    if (token && storedRole) {
-      setUserRole(storedRole);
-    }
-  }, []);
 
   const links = [
     { label: 'Home', id: 'home' },
@@ -65,6 +56,8 @@ export default function App() {
       }
     }
     
+    // Save state to localStorage
+    localStorage.setItem('currentView', viewId);
     setCurrentView(viewId);
     setMobileOpen(false);
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -72,7 +65,7 @@ export default function App() {
 
   const handleLogin = (role) => {
     setUserRole(role);
-    localStorage.setItem('user_role', role); // Save role for persistence
+    localStorage.setItem('user_role', role); 
     
     if (role === 'student') {
       handleNavigation('student-dashboard');
@@ -83,6 +76,12 @@ export default function App() {
     } else {
       handleNavigation('home');
     }
+  };
+
+  const handleLogout = () => {
+    localStorage.clear();
+    setUserRole(null);
+    handleNavigation('home');
   };
 
   const renderActiveView = () => {
@@ -139,9 +138,17 @@ export default function App() {
           <button onClick={() => handleNavigation('partner')} className="bg-red-600 text-white px-4 py-2 rounded-lg text-xs font-bold hover:bg-red-700 transition shadow-xs">
             Partner With Us
           </button>
-          <button onClick={() => handleNavigation('student-login')} className="text-slate-700 border border-slate-300 px-4 py-2 rounded-lg text-xs font-bold hover:bg-slate-50 transition">
-            Portal Logins
-          </button>
+          
+          {/* Dynamic Login/Logout UI */}
+          {!userRole ? (
+            <button onClick={() => handleNavigation('student-login')} className="text-slate-700 border border-slate-300 px-4 py-2 rounded-lg text-xs font-bold hover:bg-slate-50 transition">
+              Portal Logins
+            </button>
+          ) : (
+            <button onClick={handleLogout} className="text-red-600 border border-red-300 px-4 py-2 rounded-lg text-xs font-bold hover:bg-red-50 transition">
+              Logout
+            </button>
+          )}
         </div>
 
         <button onClick={() => setMobileOpen(!mobileOpen)} className="xl:hidden text-slate-700">
