@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Menu, X, Phone, Mail, Search } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Menu, X, Search } from 'lucide-react';
 
 // Decoupled Front-end Sub-page imports
 import LandingPage from './LandingPage';
@@ -24,7 +24,17 @@ import SuperAdminDashboard from './SuperAdmin/SuperAdminDashboard';
 export default function App() {
   const [currentView, setCurrentView] = useState('home');
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [userRole, setUserRole] = useState(null); // Tracks 'student', 'admin', or 'super-admin'
+  const [userRole, setUserRole] = useState(null);
+
+  // Restore user session on page reload
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    const storedRole = localStorage.getItem('user_role');
+    
+    if (token && storedRole) {
+      setUserRole(storedRole);
+    }
+  }, []);
 
   const links = [
     { label: 'Home', id: 'home' },
@@ -38,14 +48,13 @@ export default function App() {
   ];
 
   const handleNavigation = (viewId) => {
-    // Protection Logic: Block student pages unless logged in as a student
+    // Protection Logic
     const studentRoutes = ['student-dashboard', 'student-courses', 'student-payments'];
     if (studentRoutes.includes(viewId) && userRole !== 'student') {
       alert("Access Denied: Please log in to access the Student Portal.");
       return;
     }
     
-    // Protection Logic: Block admin areas unless authorized
     if (viewId.includes('admin') && viewId !== 'admin-login' && viewId !== 'super-admin-login') {
       if (userRole !== 'admin' && userRole !== 'super-admin') {
         alert("Access Denied: Please log in as an administrator.");
@@ -60,6 +69,8 @@ export default function App() {
 
   const handleLogin = (role) => {
     setUserRole(role);
+    localStorage.setItem('user_role', role); // Save role for persistence
+    
     if (role === 'student') {
       handleNavigation('student-dashboard');
     } else if (role === 'admin') {
@@ -84,7 +95,7 @@ export default function App() {
       case 'register': return <Register onNavigate={handleNavigation} onRegisterSuccess={() => handleNavigation('student-login')} />;
       case 'super-admin-register': return <SuperAdminRegister onNavigate={handleNavigation} onRegisterSuccess={() => handleNavigation('super-admin-login')} />;
       
-      // Linked Student Pages (rendered dynamically under App routing)
+      // Linked Student Pages
       case 'student-dashboard': return <StudentDashboard onNavigate={handleNavigation} />;
       case 'student-courses': return <CourseCatalog onNavigate={handleNavigation} />;
       case 'student-payments': return <PaymentPortal onNavigate={handleNavigation} />;
