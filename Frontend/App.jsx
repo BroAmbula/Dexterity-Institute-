@@ -57,24 +57,32 @@ export default function App() {
     { label: 'Contact', id: 'contact' }, { label: 'FAQs', id: 'faq' }
   ];
 
+  // UPDATED NAVIGATION LOGIC
   const handleNavigation = (viewId, data = null) => {
     if (data) setSelectedCourse(data);
-    
-    // Security check by route prefix
-    if (viewId.startsWith('student-') && userRole !== 'student') {
-        alert("Access Denied: Student portal only."); return;
-    }
-    if (viewId.startsWith('admin-') && userRole !== 'admin') {
-        alert("Access Denied: Admin portal only."); return;
-    }
-    if (viewId.startsWith('super-admin-') && userRole !== 'super-admin') {
-        alert("Access Denied: Super Admin portal only."); return;
-    }
-    // Specific check for adding courses
-    if (viewId === 'add-course' && userRole !== 'super-admin') {
-        alert("Access Denied: Unauthorized."); return;
+
+    // 1. Define specific views that are protected and require a role
+    const protectedRoutes = [
+      { id: 'student-dashboard', role: 'student' },
+      { id: 'student-courses', role: 'student' },
+      { id: 'student-payments', role: 'student' },
+      { id: 'admin-dashboard', role: 'admin' },
+      { id: 'admin-enrollments', role: 'admin' },
+      { id: 'application-review', role: 'admin' },
+      { id: 'super-admin-dashboard', role: 'super-admin' },
+      { id: 'add-course', role: 'super-admin' }
+    ];
+
+    // 2. Check if the requested view is in our protected list
+    const restrictedView = protectedRoutes.find(route => route.id === viewId);
+
+    // 3. If it IS restricted, check if the user has the correct role
+    if (restrictedView && userRole !== restrictedView.role) {
+      alert(`Access Denied: This area requires ${restrictedView.role} privileges.`);
+      return; 
     }
 
+    // 4. If we passed the check, proceed
     localStorage.setItem('currentView', viewId);
     setCurrentView(viewId);
     setMobileOpen(false);
