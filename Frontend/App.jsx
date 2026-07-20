@@ -26,7 +26,7 @@ export default function App() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [userRole, setUserRole] = useState(null);
 
-  // Restore user session on page reload
+  // Restore user session on page load
   useEffect(() => {
     const token = localStorage.getItem('token');
     const storedRole = localStorage.getItem('user_role');
@@ -50,9 +50,12 @@ export default function App() {
   const handleNavigation = (viewId) => {
     // Protection Logic
     const studentRoutes = ['student-dashboard', 'student-courses', 'student-payments'];
-    if (studentRoutes.includes(viewId) && userRole !== 'student') {
-      alert("Access Denied: Please log in to access the Student Portal.");
-      return;
+    
+    if (studentRoutes.includes(viewId)) {
+      if (userRole !== 'student') {
+        alert("Access Denied: Please log in to access the Student Portal.");
+        return;
+      }
     }
     
     if (viewId.includes('admin') && viewId !== 'admin-login' && viewId !== 'super-admin-login') {
@@ -113,7 +116,6 @@ export default function App() {
 
   return (
     <div className="min-h-screen flex flex-col justify-between bg-white text-slate-800 antialiased">
-      
       <header className="bg-white border-b sticky top-0 z-50 px-6 sm:px-8 py-4 flex items-center justify-between">
         <div className="flex items-center gap-2 cursor-pointer" onClick={() => handleNavigation('home')}>
           <img src="/logo.png" alt="Dexterity Initiative" className="h-8 w-auto" />
