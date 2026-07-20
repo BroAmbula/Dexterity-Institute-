@@ -28,19 +28,23 @@ export default function Login() {
         throw new Error(data.message || 'Invalid email or password.');
       }
 
-      if (!data?.token || !data?.user || typeof data.user.role !== 'string') {
+      const payload = data?.data && typeof data.data === 'object' ? data.data : data;
+      const user = payload?.user ?? (typeof payload?.role === 'string' ? payload : null);
+      const token = payload?.token || payload?.access_token;
+
+      if (!token || !user || typeof user.role !== 'string') {
         throw new Error('The server returned an incomplete login response. Please try again or contact support.');
       }
 
       // 1. Store dynamic details securely in local storage
-      localStorage.setItem('dex_token', data.token);
-      localStorage.setItem('dex_user_role', data.user.role);
-      localStorage.setItem('dex_user_name', data.user.name);
+      localStorage.setItem('dex_token', token);
+      localStorage.setItem('dex_user_role', user.role);
+      localStorage.setItem('dex_user_name', user.name || '');
 
       // 2. Direct user straight to their corresponding control dashboard
-      if (data.user.role === 'SUPER_ADMIN') {
+      if (user.role === 'SUPER_ADMIN') {
         window.location.href = '/super-admin/dashboard';
-      } else if (data.user.role === 'ADMIN') {
+      } else if (user.role === 'ADMIN') {
         window.location.href = '/admin/dashboard';
       } else {
         window.location.href = '/student/dashboard';

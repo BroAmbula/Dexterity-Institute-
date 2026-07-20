@@ -3,10 +3,14 @@ import { Mail, Lock, GraduationCap, Shield, ShieldAlert, ArrowRight } from 'luci
 import { apiRequest } from './apiConfig';
 
 const completeLogin = (data, onLogin) => {
-  const user = data?.user;
+  // Support both the direct Laravel response and APIs that wrap the payload in
+  // a `data` object (or name the token `access_token`).
+  const payload = data?.data && typeof data.data === 'object' ? data.data : data;
+  const user = payload?.user ?? (typeof payload?.role === 'string' ? payload : null);
   const role = user?.role;
+  const token = payload?.token || payload?.access_token;
 
-  if (!data?.token || !user || typeof role !== 'string') {
+  if (!token || !user || typeof role !== 'string') {
     throw new Error('The server returned an incomplete login response. Please try again or contact support.');
   }
 
@@ -15,7 +19,7 @@ const completeLogin = (data, onLogin) => {
     throw new Error('Your account has an unrecognized access role. Please contact support.');
   }
 
-  localStorage.setItem('dex_token', data.token);
+  localStorage.setItem('dex_token', token);
   localStorage.setItem('dex_user_role', role);
   localStorage.setItem('dex_user_name', user.name || '');
   onLogin(normalizedRole);
