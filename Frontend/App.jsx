@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Menu, X, Search } from 'lucide-react';
 import { getApiBaseUrl } from './apiConfig';
 
-// Pages
+// Public & Auth Imports
 import LandingPage from './LandingPage';
 import AboutPage from './AboutPage';
 import CoursePage from './CoursePage';
@@ -12,13 +12,19 @@ import PartnerWithUs from './PartnerWithUs';
 import ContactPage from './ContactPage';
 import FAQPage from './FAQPage';
 import Register from './Register';
-import SuperAdminRegister from './SuperAdminRegister';
 import { StudentLogin, AdminLogin, SuperAdminLogin } from './AuthPages';
+
+// Student Imports
 import StudentDashboard from './Student/StudentDashboard';
 import CourseCatalog from './Student/CourseCatalog';
 import PaymentPortal from './Student/PaymentPortal';
+
+// Admin Imports
 import AdminDashboard from './Admin/AdminDashboard';
+
+// Super Admin Imports
 import SuperAdminDashboard from './SuperAdmin/SuperAdminDashboard';
+import AddCourse from './SuperAdmin/AddCourse';
 
 export default function App() {
   const [currentView, setCurrentView] = useState(() => localStorage.getItem('currentView') || 'home');
@@ -27,7 +33,7 @@ export default function App() {
   const [selectedCourse, setSelectedCourse] = useState(null);
   const [enrolledCourses, setEnrolledCourses] = useState([]);
 
-  // Fetch data for student dashboard
+  // Fetch student tracks
   useEffect(() => {
     if (userRole === 'student') {
       const fetchTracks = async () => {
@@ -54,11 +60,19 @@ export default function App() {
   const handleNavigation = (viewId, data = null) => {
     if (data) setSelectedCourse(data);
     
-    // Security check
-    const studentRoutes = ['student-dashboard', 'student-courses', 'student-payments'];
-    if (studentRoutes.includes(viewId) && userRole !== 'student') {
-        alert("Access Denied: Please log in to access the Student Portal.");
-        return;
+    // Security check by route prefix
+    if (viewId.startsWith('student-') && userRole !== 'student') {
+        alert("Access Denied: Student portal only."); return;
+    }
+    if (viewId.startsWith('admin-') && userRole !== 'admin') {
+        alert("Access Denied: Admin portal only."); return;
+    }
+    if (viewId.startsWith('super-admin-') && userRole !== 'super-admin') {
+        alert("Access Denied: Super Admin portal only."); return;
+    }
+    // Specific check for adding courses
+    if (viewId === 'add-course' && userRole !== 'super-admin') {
+        alert("Access Denied: Unauthorized."); return;
     }
 
     localStorage.setItem('currentView', viewId);
@@ -72,6 +86,7 @@ export default function App() {
     localStorage.setItem('user_role', role); 
     if (role === 'student') handleNavigation('student-dashboard');
     else if (role === 'admin') handleNavigation('admin-dashboard');
+    else if (role === 'super-admin') handleNavigation('super-admin-dashboard');
     else handleNavigation('home');
   };
 
@@ -92,11 +107,21 @@ export default function App() {
       case 'contact': return <ContactPage onNavigate={handleNavigation} />;
       case 'faq': return <FAQPage onNavigate={handleNavigation} />;
       case 'register': return <Register onNavigate={handleNavigation} onRegisterSuccess={() => handleNavigation('student-login')} />;
+      
+      // Student Views
       case 'student-dashboard': return <StudentDashboard onNavigate={handleNavigation} enrolledCourses={enrolledCourses} />;
       case 'student-courses': return <CourseCatalog onNavigate={handleNavigation} />;
       case 'student-payments': return <PaymentPortal onNavigate={handleNavigation} course={selectedCourse} />;
       case 'student-login': return <StudentLogin onNavigate={handleNavigation} onLogin={handleLogin} />;
+      
+      // Admin Views
       case 'admin-dashboard': return <AdminDashboard onNavigate={handleNavigation} />;
+      
+      // Super Admin Views
+      case 'super-admin-dashboard': return <SuperAdminDashboard onNavigate={handleNavigation} />;
+      case 'super-admin-login': return <SuperAdminLogin onNavigate={handleNavigation} onLogin={handleLogin} />;
+      case 'add-course': return <AddCourse onNavigate={handleNavigation} />;
+
       default: return <LandingPage onNavigate={handleNavigation} />;
     }
   };

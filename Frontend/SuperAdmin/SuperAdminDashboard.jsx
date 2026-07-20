@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { apiRequest } from '../apiConfig';
 
-export default function SuperAdminDashboard() {
+export default function SuperAdminDashboard({ onNavigate }) {
   const [metrics, setMetrics] = useState({
     revenue_usd: 0,
     revenue_kes: 0,
@@ -114,14 +114,24 @@ export default function SuperAdminDashboard() {
             <p className="text-xs text-gray-500 mb-6">Direct access to critical administrative pipelines.</p>
             
             <div className="space-y-3">
+              <button 
+                onClick={() => onNavigate('add-course')}
+                className="w-full py-3 px-4 bg-emerald-600 text-white font-semibold rounded-xl hover:bg-emerald-700 transition text-left text-sm flex justify-between"
+              >
+                <span>Add New Course</span>
+                <span>➔</span>
+              </button>
+              
               <button className="w-full py-3 px-4 bg-gray-900 text-white font-semibold rounded-xl hover:bg-black transition text-left text-sm flex justify-between">
                 <span>Manage Global Exchange Rates</span>
                 <span>➔</span>
               </button>
+              
               <button className="w-full py-3 px-4 bg-blue-50 text-blue-700 font-semibold rounded-xl hover:bg-blue-100 transition text-left text-sm flex justify-between">
                 <span>Configure Staff Access</span>
                 <span>➔</span>
               </button>
+              
               <button className="w-full py-3 px-4 bg-amber-50 text-amber-700 font-semibold rounded-xl hover:bg-amber-100 transition text-left text-sm flex justify-between">
                 <span>Verify M-Pesa Discrepancy</span>
                 <span>➔</span>
@@ -130,7 +140,6 @@ export default function SuperAdminDashboard() {
           </div>
 
         </div>
-
       </div>
     </div>
   );
