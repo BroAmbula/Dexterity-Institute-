@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Mail, Lock, GraduationCap, Shield, ShieldAlert, ArrowRight } from 'lucide-react';
+import { apiRequest } from './apiConfig';
 
 // --- Shared UI Components ---
 
@@ -25,10 +26,20 @@ export const StudentLogin = ({ onNavigate, onLogin }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('Student Login Attempt:', { email, password });
-    onLogin(); // Triggers the App state update
+    try {
+      const data = await apiRequest('/api/login', {
+        method: 'POST',
+        body: JSON.stringify({ email, password })
+      });
+      localStorage.setItem('dex_token', data.token);
+      localStorage.setItem('dex_user_role', data.user.role);
+      localStorage.setItem('dex_user_name', data.user.name);
+      onLogin();
+    } catch (err) {
+      alert(err.message || 'Login failed');
+    }
   };
 
   return (
@@ -74,10 +85,20 @@ export const AdminLogin = ({ onNavigate, onLogin }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('Admin Login Attempt:', { email, password });
-    onLogin(); // Triggers the App state update
+    try {
+      const data = await apiRequest('/api/login', {
+        method: 'POST',
+        body: JSON.stringify({ email, password })
+      });
+      localStorage.setItem('dex_token', data.token);
+      localStorage.setItem('dex_user_role', data.user.role);
+      localStorage.setItem('dex_user_name', data.user.name);
+      onLogin();
+    } catch (err) {
+      alert(err.message || 'Login failed');
+    }
   };
 
   return (
@@ -113,10 +134,20 @@ export const SuperAdminLogin = ({ onNavigate, onLogin }) => {
   const [password, setPassword] = useState('');
   const [securityCode, setSecurityCode] = useState(''); 
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('Super Admin Login Attempt:', { email, password, securityCode });
-    onLogin(); // Triggers the App state update
+    try {
+      const data = await apiRequest('/api/login', {
+        method: 'POST',
+        body: JSON.stringify({ email, password })
+      });
+      localStorage.setItem('dex_token', data.token);
+      localStorage.setItem('dex_user_role', data.user.role);
+      localStorage.setItem('dex_user_name', data.user.name);
+      onLogin();
+    } catch (err) {
+      alert(err.message || 'Login failed');
+    }
   };
 
   return (

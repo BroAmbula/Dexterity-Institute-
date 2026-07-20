@@ -18,6 +18,8 @@ import { StudentLogin, AdminLogin, SuperAdminLogin } from './AuthPages';
 import StudentDashboard from './Student/StudentDashboard';
 import CourseCatalog from './Student/CourseCatalog';
 import PaymentPortal from './Student/PaymentPortal';
+import AdminDashboard from './Admin/AdminDashboard';
+import SuperAdminDashboard from './SuperAdmin/SuperAdminDashboard';
 
 export default function App() {
   const [currentView, setCurrentView] = useState('home');
@@ -59,9 +61,13 @@ export default function App() {
   const handleLogin = (role) => {
     setUserRole(role);
     if (role === 'student') {
-      handleNavigation('student-dashboard'); // Redirect student directly to their custom Dashboard
+      handleNavigation('student-dashboard');
+    } else if (role === 'admin') {
+      handleNavigation('admin-dashboard');
+    } else if (role === 'super-admin') {
+      handleNavigation('super-admin-dashboard');
     } else {
-      handleNavigation('home'); 
+      handleNavigation('home');
     }
   };
 
@@ -87,6 +93,8 @@ export default function App() {
       case 'student-login': return <StudentLogin onNavigate={handleNavigation} onLogin={() => handleLogin('student')} />;
       case 'admin-login': return <AdminLogin onNavigate={handleNavigation} onLogin={() => handleLogin('admin')} />;
       case 'super-admin-login': return <SuperAdminLogin onNavigate={handleNavigation} onLogin={() => handleLogin('super-admin')} />;
+      case 'admin-dashboard': return <AdminDashboard onNavigate={handleNavigation} />;
+      case 'super-admin-dashboard': return <SuperAdminDashboard onNavigate={handleNavigation} />;
       
       default: return <LandingPage onNavigate={handleNavigation} />;
     }

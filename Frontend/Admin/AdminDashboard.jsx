@@ -1,17 +1,31 @@
 import React, { useState, useEffect } from 'react';
+import { apiRequest } from '../apiConfig';
 
 export default function AdminDashboard() {
   const [stats, setStats] = useState({
-    active_students: 398,
-    pending_applications: 14,
-    completed_courses: 52
+    active_students: 0,
+    pending_applications: 0,
+    completed_courses: 0
   });
 
-  const [recentApplications, setRecentApplications] = useState([
-    { id: '1', name: 'Faith Mutua', course: 'Startup Launch', date: '2026-07-16' },
-    { id: '2', name: 'Brian Omondi', course: 'Emerging Leaders', date: '2026-07-15' },
-    { id: '3', name: 'Clara Chebet', course: 'CareerCraft Campus', date: '2026-07-15' }
-  ]);
+  const [recentApplications, setRecentApplications] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    const loadStats = async () => {
+      try {
+        const data = await apiRequest('/api/admin/dashboard/stats');
+        setStats(data);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadStats();
+  }, []);
 
   return (
     <div className="p-6 bg-gray-50 min-h-screen text-gray-800">
@@ -23,8 +37,16 @@ export default function AdminDashboard() {
           <p className="text-gray-500">Day-to-day class registries, student profiling, and applications review.</p>
         </div>
 
-        {/* Actionable Cards Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        {error && (
+          <div className="bg-red-50 text-red-700 text-xs font-bold p-4 rounded-xl border border-red-100 mb-6">
+            ⚠️ {error}
+          </div>
+        )}
+
+        {loading ? (
+          <div className="text-gray-400 font-semibold mb-8">Loading admin metrics...</div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
             <span className="text-xs font-bold text-gray-400 uppercase">My Active Students</span>
             <h3 className="text-3xl font-black text-gray-900 mt-2">{stats.active_students}</h3>
@@ -40,6 +62,7 @@ export default function AdminDashboard() {
             <h3 className="text-3xl font-black text-gray-900 mt-2">{stats.completed_courses}</h3>
           </div>
         </div>
+        )}
 
         {/* Live Application Pipeline */}
         <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
@@ -49,7 +72,9 @@ export default function AdminDashboard() {
           </div>
 
           <div className="divide-y divide-gray-100">
-            {recentApplications.map((app) => (
+            {recentApplications.length === 0 ? (
+              <p className="text-sm text-gray-400">No recent applications to display.</p>
+            ) : recentApplications.map((app) => (
               <div key={app.id} className="py-4 flex justify-between items-center first:pt-0 last:pb-0">
                 <div>
                   <h4 className="font-bold text-gray-900">{app.name}</h4>

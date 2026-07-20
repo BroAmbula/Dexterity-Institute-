@@ -1,24 +1,36 @@
 import React, { useState, useEffect } from 'react';
+import { apiRequest } from '../apiConfig';
 
 export default function SuperAdminDashboard() {
   const [metrics, setMetrics] = useState({
-    revenue_usd: 12540.00,
-    revenue_kes: 1630200.00,
-    total_students: 412,
-    pending_reviews: 14,
-    conversion_rate: 68.4
+    revenue_usd: 0,
+    revenue_kes: 0,
+    total_students: 0,
+    pending_reviews: 0,
+    conversion_rate: 0
   });
 
-  const [schoolDistribution, setSchoolDistribution] = useState([
-    { name: 'School of CareerCraft', students: 185, color: 'bg-blue-600' },
-    { name: "Eagle's Nest Incubation Hub", students: 94, color: 'bg-emerald-600' },
-    { name: 'School of Personal Development', students: 112, color: 'bg-purple-600' },
-    { name: 'School of Leadership', students: 21, color: 'bg-amber-500' }
-  ]);
+  const [schoolDistribution, setSchoolDistribution] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
-  // Placeholder for real backend integration later
   useEffect(() => {
-    // fetch('/api/admin/dashboard/stats').then(...)
+    const loadMetrics = async () => {
+      try {
+        const data = await apiRequest('/api/super-admin/dashboard/stats');
+        setMetrics(data.metrics);
+        setSchoolDistribution((data.distribution || []).map((item) => ({
+          ...item,
+          color: item.name.includes('Career') ? 'bg-blue-600' : item.name.includes('Leadership') ? 'bg-amber-500' : item.name.includes('Personal') ? 'bg-purple-600' : 'bg-emerald-600'
+        })));
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadMetrics();
   }, []);
 
   return (
@@ -31,8 +43,16 @@ export default function SuperAdminDashboard() {
           <p className="text-gray-500">Global financial oversight and academic distribution matrices.</p>
         </div>
 
-        {/* Metric Cards Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
+        {error && (
+          <div className="bg-red-50 text-red-700 text-xs font-bold p-4 rounded-xl border border-red-100 mb-6">
+            ⚠️ {error}
+          </div>
+        )}
+
+        {loading ? (
+          <div className="text-gray-400 font-semibold mb-8">Loading super-admin metrics...</div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
           
           <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
             <span className="text-xs font-bold text-gray-400 uppercase">Revenue (USD)</span>
@@ -60,6 +80,7 @@ export default function SuperAdminDashboard() {
           </div>
 
         </div>
+        )}
 
         {/* Main Workspace Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -68,7 +89,9 @@ export default function SuperAdminDashboard() {
           <div className="lg:col-span-2 bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
             <h2 className="text-lg font-bold text-gray-950 mb-6">Student Distribution</h2>
             <div className="space-y-6">
-              {schoolDistribution.map((school, i) => (
+              {schoolDistribution.length === 0 ? (
+                <p className="text-sm text-gray-400">No school distribution data available.</p>
+              ) : schoolDistribution.map((school, i) => (
                 <div key={i}>
                   <div className="flex justify-between text-sm font-semibold mb-2">
                     <span>{school.name}</span>
@@ -77,7 +100,7 @@ export default function SuperAdminDashboard() {
                   <div className="w-full bg-gray-100 rounded-full h-3">
                     <div 
                       className={`h-3 rounded-full ${school.color}`} 
-                      style={{ width: `${(school.students / metrics.total_students) * 100}%` }}
+                      style={{ width: `${metrics.total_students > 0 ? (school.students / metrics.total_students) * 100 : 0}%` }}
                     />
                   </div>
                 </div>
