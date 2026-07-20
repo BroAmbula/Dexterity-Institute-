@@ -24,8 +24,8 @@ class AuthController extends Controller
         ]);
 
         // Guard against registration exploits: standard signups ALWAYS default to STUDENT
+        // Removed 'id' => Str::uuid() so the database handles auto-incrementing IDs
         $user = User::create([
-            'id' => Str::uuid(),
             'first_name' => $fields['first_name'],
             'last_name' => $fields['last_name'],
             'email' => $fields['email'],
