@@ -24,22 +24,15 @@ class AuthController extends Controller
         ]);
 
         // Guard against registration exploits: standard signups ALWAYS default to STUDENT
-        // Removed 'id' => Str::uuid() so the database handles auto-incrementing IDs
-        $user = User::create([
-            'first_name' => $fields['first_name'],
-            'last_name' => $fields['last_name'],
-            'email' => $fields['email'],
-            'password' => Hash::make($fields['password']),
-            'role' => 'STUDENT', 
-            'status' => 'ACTIVE',
-        ]);
-
-        $this->sendVerificationCode($user->email);
-
-        return response()->json([
-            'message' => 'Account created. A verification code has been sent to your email address.',
-            'email' => $user->email,
-        ], 201);
+$user = User::create([
+    'first_name' => $fields['first_name'],
+    'last_name' => $fields['last_name'],
+    'name' => $fields['first_name'] . ' ' . $fields['last_name'], // ADD THIS LINE
+    'email' => $fields['email'],
+    'password' => Hash::make($fields['password']),
+    'role' => 'STUDENT', 
+    'status' => 'ACTIVE',
+]);
     }
 
     public function verifyEmail(Request $request): JsonResponse
