@@ -15,6 +15,8 @@ use Illuminate\Support\Facades\Route;
 // 1. PUBLIC AUTHENTICATION PIPELINE
 // ==========================================
 Route::post('/register', [AuthController::class, 'register']);
+Route::post('/verify-email', [AuthController::class, 'verifyEmail']);
+Route::post('/resend-verification-code', [AuthController::class, 'resendVerificationCode']);
 Route::post('/login', [AuthController::class, 'login']);
 
 Route::middleware('auth:sanctum')->group(function () {
