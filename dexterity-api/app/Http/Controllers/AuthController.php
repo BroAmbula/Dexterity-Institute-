@@ -24,15 +24,24 @@ class AuthController extends Controller
         ]);
 
         // Guard against registration exploits: standard signups ALWAYS default to STUDENT
-$user = User::create([
-    'first_name' => $fields['first_name'],
-    'last_name' => $fields['last_name'],
-    'name' => $fields['first_name'] . ' ' . $fields['last_name'], // ADD THIS LINE
-    'email' => $fields['email'],
-    'password' => Hash::make($fields['password']),
-    'role' => 'STUDENT', 
-    'status' => 'ACTIVE',
-]);
+        $user = User::create([
+            'first_name' => $fields['first_name'],
+            'last_name' => $fields['last_name'],
+            'name' => $fields['first_name'] . ' ' . $fields['last_name'],
+            'email' => $fields['email'],
+            'password' => Hash::make($fields['password']),
+            'role' => 'STUDENT', 
+            'status' => 'ACTIVE',
+        ]);
+
+        // Trigger the email verification process
+        $this->sendVerificationCode($user->email);
+
+        // Return the response after the logic is complete
+        return response()->json([
+            'message' => 'Account created. A verification code has been sent to your email address.',
+            'email' => $user->email,
+        ], 201);
     }
 
     public function verifyEmail(Request $request): JsonResponse
