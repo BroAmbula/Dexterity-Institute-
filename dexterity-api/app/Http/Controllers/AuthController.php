@@ -3,18 +3,15 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
-use App\Models\EmailVerificationCode;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Str;
-use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Log;
 
 class AuthController extends Controller
 {
-    // 1. Secure Registration
+    // 1. Registration (Auto-verified & Auto-login)
     public function register(Request $request): JsonResponse
     {
         $fields = $request->validate([
@@ -32,56 +29,17 @@ class AuthController extends Controller
             'password' => Hash::make($fields['password']),
             'role' => 'STUDENT', 
             'status' => 'ACTIVE',
+            'email_verified_at' => now(), // Automatically mark as verified
         ]);
 
-        $this->sendVerificationCode($user->email);
-
-        return response()->json([
-            'message' => 'Account created. A verification code has been sent to your email address.',
-            'email' => $user->email,
-        ], 201);
-    }
-
-    public function verifyEmail(Request $request): JsonResponse
-    {
-        $fields = $request->validate([
-            'email' => 'required|string|email',
-            'otp' => 'required|string|digits:6',
-        ]);
-
-        $code = EmailVerificationCode::where('email', $fields['email'])
-            ->latest()
-            ->first();
-
-        if (!$code || $code->expires_at->isPast() || !Hash::check($fields['otp'], $code->code_hash)) {
-            return response()->json(['message' => 'The verification code is invalid or has expired.'], 422);
-        }
-
-        $user = User::where('email', $fields['email'])->firstOrFail();
-        $user->update(['email_verified_at' => now()]);
-        EmailVerificationCode::where('email', $user->email)->delete();
-
+        // Generate Sanctum access token for immediate login
         $token = $user->createToken('dexterity_access_token')->plainTextToken;
 
         return response()->json([
-            'message' => 'Email verified successfully.',
+            'message' => 'Account created successfully.',
             'user' => $this->userPayload($user),
             'token' => $token,
-        ]);
-    }
-
-    public function resendVerificationCode(Request $request): JsonResponse
-    {
-        $fields = $request->validate(['email' => 'required|string|email']);
-        $user = User::where('email', $fields['email'])->first();
-
-        if (!$user) {
-            return response()->json(['message' => 'If an account exists, a new verification code has been sent.']);
-        }
-
-        $this->sendVerificationCode($user->email);
-
-        return response()->json(['message' => 'A new verification code has been sent.']);
+        ], 201);
     }
 
     // 2. Token Issuance / Login
@@ -92,16 +50,14 @@ class AuthController extends Controller
             'password' => 'required|string',
         ]);
 
-        // Attempt to find user
         $user = User::where('email', $fields['email'])->first();
 
-        // ADDED LOGGING FOR DEBUGGING
+        // Logging for debugging
         if ($user) {
             $isMatch = Hash::check($fields['password'], $user->password);
             Log::info('Login Attempt', [
                 'email' => $fields['email'],
                 'password_match' => $isMatch,
-                'stored_hash' => $user->password
             ]);
         } else {
             Log::info('Login Attempt: User not found', ['email' => $fields['email']]);
@@ -113,7 +69,6 @@ class AuthController extends Controller
             ], 401);
         }
 
-        // Hard stop check for banned users
         if ($user->status === 'BANNED') {
             return response()->json([
                 'error' => 'Account Suspended',
@@ -121,36 +76,13 @@ class AuthController extends Controller
             ], 403);
         }
 
-        // Generate Sanctum access token
         $token = $user->createToken('dexterity_access_token')->plainTextToken;
 
         return response()->json([
             'message' => 'Login successful',
-            'user' => [
-                'id' => $user->id,
-                'name' => "{$user->first_name} {$user->last_name}",
-                'email' => $user->email,
-                'role' => $user->role,
-            ],
+            'user' => $this->userPayload($user),
             'token' => $token
         ]);
-    }
-
-    private function sendVerificationCode(string $email): void
-    {
-        $code = (string) random_int(100000, 999999);
-
-        EmailVerificationCode::where('email', $email)->delete();
-        EmailVerificationCode::create([
-            'email' => $email,
-            'code_hash' => Hash::make($code),
-            'expires_at' => now()->addMinutes(10),
-        ]);
-
-        Mail::raw(
-            "Your Dexterity Initiative verification code is {$code}. It expires in 10 minutes. Do not share this code with anyone.",
-            fn ($message) => $message->to($email)->subject('Your Dexterity Initiative verification code')
-        );
     }
 
     private function userPayload(User $user): array
@@ -166,7 +98,6 @@ class AuthController extends Controller
     // 3. Token Revocation / Logout
     public function logout(Request $request): JsonResponse
     {
-        // Delete current token in use
         $request->user()->currentAccessToken()->delete();
 
         return response()->json([
