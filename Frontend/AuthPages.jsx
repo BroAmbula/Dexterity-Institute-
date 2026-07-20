@@ -2,6 +2,25 @@ import React, { useState } from 'react';
 import { Mail, Lock, GraduationCap, Shield, ShieldAlert, ArrowRight } from 'lucide-react';
 import { apiRequest } from './apiConfig';
 
+const completeLogin = (data, onLogin) => {
+  const user = data?.user;
+  const role = user?.role;
+
+  if (!data?.token || !user || typeof role !== 'string') {
+    throw new Error('The server returned an incomplete login response. Please try again or contact support.');
+  }
+
+  const normalizedRole = role.toLowerCase().replace('_', '-');
+  if (!['student', 'admin', 'super-admin'].includes(normalizedRole)) {
+    throw new Error('Your account has an unrecognized access role. Please contact support.');
+  }
+
+  localStorage.setItem('dex_token', data.token);
+  localStorage.setItem('dex_user_role', role);
+  localStorage.setItem('dex_user_name', user.name || '');
+  onLogin(normalizedRole);
+};
+
 // --- Shared UI Components ---
 
 const InputField = ({ icon: Icon, type, placeholder, value, onChange }) => (
@@ -33,10 +52,7 @@ export const StudentLogin = ({ onNavigate, onLogin }) => {
         method: 'POST',
         body: JSON.stringify({ email, password })
       });
-      localStorage.setItem('dex_token', data.token);
-      localStorage.setItem('dex_user_role', data.user.role);
-      localStorage.setItem('dex_user_name', data.user.name);
-      onLogin();
+      completeLogin(data, onLogin);
     } catch (err) {
       alert(err.message || 'Login failed');
     }
@@ -92,10 +108,7 @@ export const AdminLogin = ({ onNavigate, onLogin }) => {
         method: 'POST',
         body: JSON.stringify({ email, password })
       });
-      localStorage.setItem('dex_token', data.token);
-      localStorage.setItem('dex_user_role', data.user.role);
-      localStorage.setItem('dex_user_name', data.user.name);
-      onLogin();
+      completeLogin(data, onLogin);
     } catch (err) {
       alert(err.message || 'Login failed');
     }
@@ -141,10 +154,7 @@ export const SuperAdminLogin = ({ onNavigate, onLogin }) => {
         method: 'POST',
         body: JSON.stringify({ email, password })
       });
-      localStorage.setItem('dex_token', data.token);
-      localStorage.setItem('dex_user_role', data.user.role);
-      localStorage.setItem('dex_user_name', data.user.name);
-      onLogin();
+      completeLogin(data, onLogin);
     } catch (err) {
       alert(err.message || 'Login failed');
     }

@@ -28,6 +28,10 @@ export default function Login() {
         throw new Error(data.message || 'Invalid email or password.');
       }
 
+      if (!data?.token || !data?.user || typeof data.user.role !== 'string') {
+        throw new Error('The server returned an incomplete login response. Please try again or contact support.');
+      }
+
       // 1. Store dynamic details securely in local storage
       localStorage.setItem('dex_token', data.token);
       localStorage.setItem('dex_user_role', data.user.role);

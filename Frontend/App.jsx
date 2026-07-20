@@ -90,9 +90,9 @@ export default function App() {
       case 'student-payments': return <PaymentPortal onNavigate={handleNavigation} />;
       
       // Portals
-      case 'student-login': return <StudentLogin onNavigate={handleNavigation} onLogin={() => handleLogin('student')} />;
-      case 'admin-login': return <AdminLogin onNavigate={handleNavigation} onLogin={() => handleLogin('admin')} />;
-      case 'super-admin-login': return <SuperAdminLogin onNavigate={handleNavigation} onLogin={() => handleLogin('super-admin')} />;
+      case 'student-login': return <StudentLogin onNavigate={handleNavigation} onLogin={handleLogin} />;
+      case 'admin-login': return <AdminLogin onNavigate={handleNavigation} onLogin={handleLogin} />;
+      case 'super-admin-login': return <SuperAdminLogin onNavigate={handleNavigation} onLogin={handleLogin} />;
       case 'admin-dashboard': return <AdminDashboard onNavigate={handleNavigation} />;
       case 'super-admin-dashboard': return <SuperAdminDashboard onNavigate={handleNavigation} />;
       
