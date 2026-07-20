@@ -57,11 +57,10 @@ export default function App() {
     { label: 'Contact', id: 'contact' }, { label: 'FAQs', id: 'faq' }
   ];
 
-  // UPDATED NAVIGATION LOGIC
   const handleNavigation = (viewId, data = null) => {
     if (data) setSelectedCourse(data);
 
-    // 1. Define specific views that are protected and require a role
+    // Define protected routes
     const protectedRoutes = [
       { id: 'student-dashboard', role: 'student' },
       { id: 'student-courses', role: 'student' },
@@ -73,16 +72,14 @@ export default function App() {
       { id: 'add-course', role: 'super-admin' }
     ];
 
-    // 2. Check if the requested view is in our protected list
     const restrictedView = protectedRoutes.find(route => route.id === viewId);
 
-    // 3. If it IS restricted, check if the user has the correct role
+    // Enforce role check
     if (restrictedView && userRole !== restrictedView.role) {
       alert(`Access Denied: This area requires ${restrictedView.role} privileges.`);
       return; 
     }
 
-    // 4. If we passed the check, proceed
     localStorage.setItem('currentView', viewId);
     setCurrentView(viewId);
     setMobileOpen(false);
@@ -156,9 +153,18 @@ export default function App() {
         </div>
 
         <div className="hidden md:flex items-center gap-3">
+          {/* Admin Login Button */}
+          <button 
+            onClick={() => handleNavigation('super-admin-login')} 
+            className="text-xs text-slate-400 hover:text-blue-600 font-bold uppercase mr-2"
+          >
+            Admin Login
+          </button>
+
           <button onClick={() => handleNavigation('partner')} className="bg-red-600 text-white px-4 py-2 rounded-lg text-xs font-bold hover:bg-red-700 transition shadow-xs">
             Partner With Us
           </button>
+
           {!userRole ? (
             <button onClick={() => handleNavigation('student-login')} className="text-slate-700 border border-slate-300 px-4 py-2 rounded-lg text-xs font-bold hover:bg-slate-50 transition">
               Portal Logins
