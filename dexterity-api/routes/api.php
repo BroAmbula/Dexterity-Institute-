@@ -9,6 +9,7 @@ use App\Http\Controllers\SuperAdmin\AccessControlController;
 use App\Http\Controllers\SuperAdmin\ForensicAuditLogsController;
 use App\Http\Controllers\SuperAdmin\SuperAdminDashboardController;
 use App\Http\Controllers\SuperAdmin\SystemCurriculumController;
+use App\Http\Controllers\SuperAdmin\CourseController;
 use Illuminate\Support\Facades\Route;
 
 // ==========================================
@@ -49,6 +50,9 @@ Route::middleware(['auth:sanctum', 'super-admin'])->prefix('super-admin')->group
     Route::get('/curriculum', [SystemCurriculumController::class, 'index']);
     Route::patch('/global/exchange-rate', [SystemCurriculumController::class, 'updateExchangeRate']);
     Route::patch('/courses/{course}/toggle-active', [SystemCurriculumController::class, 'toggleStatus']);
+    
+    // Course Management
+    Route::post('/courses', [CourseController::class, 'store']);
     
     Route::get('/users', [AccessControlController::class, 'index']);
     Route::patch('/users/{user}/role', [AccessControlController::class, 'changeRole']);
