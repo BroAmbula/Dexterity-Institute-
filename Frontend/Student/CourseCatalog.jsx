@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { getApiBaseUrl } from '../apiConfig';
 
 export default function CourseCatalog() {
   const [courses, setCourses] = useState([]);
@@ -11,7 +12,7 @@ export default function CourseCatalog() {
     const fetchActiveCourses = async () => {
       try {
         const token = localStorage.getItem('dex_token');
-        const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'https://dexterity-institute-production.up.railway.app';
+        const apiBaseUrl = getApiBaseUrl();
         const response = await fetch(`${apiBaseUrl}/api/student/active-courses`, {
           method: 'GET',
           headers: {
@@ -45,7 +46,7 @@ export default function CourseCatalog() {
 
     try {
       const token = localStorage.getItem('dex_token');
-      const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'https://dexterity-institute-production.up.railway.app';
+      const apiBaseUrl = getApiBaseUrl();
       const response = await fetch(`${apiBaseUrl}/api/student/apply`, {
         method: 'POST',
         headers: {

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { getApiBaseUrl } from '../apiConfig';
 
 export default function StudentDashboard() {
   const [enrollments, setEnrollments] = useState([]);
@@ -10,7 +11,7 @@ export default function StudentDashboard() {
     const fetchMyTracks = async () => {
       try {
         const token = localStorage.getItem('dex_token');
-        const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'https://dexterity-institute-production.up.railway.app';
+        const apiBaseUrl = getApiBaseUrl();
         const response = await fetch(`${apiBaseUrl}/api/student/my-tracks`, {
           method: 'GET',
           headers: {

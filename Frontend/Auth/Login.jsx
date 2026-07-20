@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { getApiBaseUrl } from '../apiConfig';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -12,7 +13,7 @@ export default function Login() {
     setLoading(true);
 
     try {
-      const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'https://dexterity-institute-production.up.railway.app';
+      const apiBaseUrl = getApiBaseUrl();
       const response = await fetch(`${apiBaseUrl}/api/login`, {
         method: 'POST',
         headers: {

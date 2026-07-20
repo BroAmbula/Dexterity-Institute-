@@ -1,4 +1,20 @@
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://dexterity-institute-production.up.railway.app';
+const DEFAULT_API_BASE_URL = 'https://dexterity-institute-production.up.railway.app';
+const configuredApiBaseUrl = import.meta.env.VITE_API_BASE_URL?.trim();
+
+const isValidApiBaseUrl = (value) => {
+  if (!value || value.includes('](') || /[\[\]\s]/.test(value)) return false;
+
+  try {
+    const url = new URL(value);
+    return url.protocol === 'https:' || url.protocol === 'http:';
+  } catch {
+    return false;
+  }
+};
+
+const API_BASE_URL = isValidApiBaseUrl(configuredApiBaseUrl)
+  ? configuredApiBaseUrl
+  : DEFAULT_API_BASE_URL;
 
 export const getApiBaseUrl = () => API_BASE_URL.replace(/\/$/, '');
 
