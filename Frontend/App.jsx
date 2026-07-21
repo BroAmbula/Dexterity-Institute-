@@ -50,12 +50,49 @@ export default function App() {
     }
   }, [userRole]);
 
-  const links = [
+  // Navigation Links based on authentication status & role
+  const publicLinks = [
     { label: 'Home', id: 'home' }, { label: 'About Us', id: 'about' },
     { label: 'Courses', id: 'courses' }, { label: 'Publications', id: 'blogs' },
     { label: 'Events', id: 'events' }, { label: 'Partner', id: 'partner' },
     { label: 'Contact', id: 'contact' }, { label: 'FAQs', id: 'faq' }
   ];
+
+  const studentLinks = [
+    { label: 'Dashboard', id: 'student-dashboard' },
+    { label: 'Course Catalog', id: 'student-courses' },
+    { label: 'Payment Portal', id: 'student-payments' }
+  ];
+
+  const superAdminLinks = [
+    { label: 'Command Center', id: 'super-admin-dashboard' },
+    { label: 'Add Course', id: 'add-course' }
+  ];
+
+  const adminLinks = [
+    { label: 'Dashboard', id: 'admin-dashboard' }
+  ];
+
+  const getActiveLinks = () => {
+    if (!userRole) return publicLinks;
+    if (userRole === 'student') return studentLinks;
+    if (userRole === 'admin') return adminLinks;
+    if (userRole === 'super-admin') return superAdminLinks;
+    return publicLinks;
+  };
+
+  // Smart Logo / Home click redirects to dashboard if logged in
+  const handleHomeClick = () => {
+    if (!userRole) {
+      handleNavigation('home');
+    } else if (userRole === 'student') {
+      handleNavigation('student-dashboard');
+    } else if (userRole === 'admin') {
+      handleNavigation('admin-dashboard');
+    } else if (userRole === 'super-admin') {
+      handleNavigation('super-admin-dashboard');
+    }
+  };
 
   const handleNavigation = (viewId, data = null) => {
     if (data) setSelectedCourse(data);
@@ -134,18 +171,22 @@ export default function App() {
   return (
     <div className="min-h-screen flex flex-col justify-between bg-white text-slate-800 antialiased">
       <header className="bg-white border-b sticky top-0 z-50 px-6 sm:px-8 py-4 flex items-center justify-between">
-        <div className="flex items-center gap-2 cursor-pointer" onClick={() => handleNavigation('home')}>
+        <div className="flex items-center gap-2 cursor-pointer" onClick={handleHomeClick}>
           <img src="/logo.png" alt="Dexterity Initiative" className="h-8 w-auto" />
-          <span className="font-black text-lg text-blue-900 tracking-tight">Dexterity Initiative</span>
+          <span className="font-black text-lg text-blue-900 tracking-tight">
+            {userRole ? `${userRole.replace('-', ' ').toUpperCase()} PORTAL` : 'Dexterity Initiative'}
+          </span>
         </div>
 
-        <div className="hidden lg:flex relative max-w-xs w-full mx-6">
-          <Search className="absolute left-3 top-2.5 text-slate-400" size={16} />
-          <input type="text" placeholder="Search..." className="w-full pl-9 pr-4 py-2 rounded-full border border-slate-200 bg-slate-50 text-xs focus:ring-2 focus:ring-blue-500 outline-none transition" />
-        </div>
+        {!userRole && (
+          <div className="hidden lg:flex relative max-w-xs w-full mx-6">
+            <Search className="absolute left-3 top-2.5 text-slate-400" size={16} />
+            <input type="text" placeholder="Search..." className="w-full pl-9 pr-4 py-2 rounded-full border border-slate-200 bg-slate-50 text-xs focus:ring-2 focus:ring-blue-500 outline-none transition" />
+          </div>
+        )}
 
         <div className="hidden xl:flex items-center space-x-6 text-xs font-bold uppercase tracking-wider">
-          {links.map(l => (
+          {getActiveLinks().map(l => (
             <button key={l.id} onClick={() => handleNavigation(l.id)} className={`transition ${currentView === l.id ? 'text-red-600 border-b-2 border-red-600 pb-1' : 'text-slate-600 hover:text-blue-900'}`}>
               {l.label}
             </button>
@@ -153,23 +194,28 @@ export default function App() {
         </div>
 
         <div className="hidden md:flex items-center gap-3">
-          {/* Admin Login Button */}
-          <button 
-            onClick={() => handleNavigation('super-admin-login')} 
-            className="text-xs text-slate-400 hover:text-blue-600 font-bold uppercase mr-2"
-          >
-            Admin Login
-          </button>
+          {/* Show Admin Login & Partner buttons only if NOT logged in */}
+          {!userRole && (
+            <>
+              <button 
+                onClick={() => handleNavigation('super-admin-login')} 
+                className="text-xs text-slate-400 hover:text-blue-600 font-bold uppercase mr-2"
+              >
+                Admin Login
+              </button>
 
-          <button onClick={() => handleNavigation('partner')} className="bg-red-600 text-white px-4 py-2 rounded-lg text-xs font-bold hover:bg-red-700 transition shadow-xs">
-            Partner With Us
-          </button>
+              <button onClick={() => handleNavigation('partner')} className="bg-red-600 text-white px-4 py-2 rounded-lg text-xs font-bold hover:bg-red-700 transition shadow-xs">
+                Partner With Us
+              </button>
 
-          {!userRole ? (
-            <button onClick={() => handleNavigation('student-login')} className="text-slate-700 border border-slate-300 px-4 py-2 rounded-lg text-xs font-bold hover:bg-slate-50 transition">
-              Portal Logins
-            </button>
-          ) : (
+              <button onClick={() => handleNavigation('student-login')} className="text-slate-700 border border-slate-300 px-4 py-2 rounded-lg text-xs font-bold hover:bg-slate-50 transition">
+                Portal Logins
+              </button>
+            </>
+          )}
+
+          {/* Logout button appears when logged in */}
+          {userRole && (
             <button onClick={handleLogout} className="text-red-600 border border-red-300 px-4 py-2 rounded-lg text-xs font-bold hover:bg-red-50 transition">
               Logout
             </button>
@@ -182,11 +228,16 @@ export default function App() {
 
         {mobileOpen && (
           <div className="absolute top-full left-0 w-full bg-white border-b shadow-xl p-6 flex flex-col gap-3 xl:hidden">
-            {links.map(l => (
+            {getActiveLinks().map(l => (
               <button key={l.id} onClick={() => handleNavigation(l.id)} className="text-left py-2 text-sm font-bold border-b border-slate-50 text-slate-800">
                 {l.label}
               </button>
             ))}
+            {userRole && (
+              <button onClick={handleLogout} className="text-left py-2 text-sm font-bold text-red-600 mt-2">
+                Logout
+              </button>
+            )}
           </div>
         )}
       </header>
