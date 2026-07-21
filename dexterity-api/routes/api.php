@@ -62,7 +62,9 @@ Route::middleware(['auth:sanctum', 'super-admin'])->prefix('super-admin')->group
     // Course & PDF Management for Super Admin
     Route::post('/courses', [CourseController::class, 'store']);
     
+    // User & Staff Access Control
     Route::get('/users', [AccessControlController::class, 'index']);
+    Route::post('/users', [AccessControlController::class, 'store']);
     Route::patch('/users/{user}/role', [AccessControlController::class, 'changeRole']);
     Route::patch('/users/{user}/toggle-ban', [AccessControlController::class, 'toggleBan']);
     
