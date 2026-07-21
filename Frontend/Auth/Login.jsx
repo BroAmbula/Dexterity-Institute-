@@ -37,15 +37,23 @@ export default function Login() {
         throw new Error('The server returned an incomplete login response. Please try again or contact support.');
       }
 
-      // 1. Store dynamic details securely in local storage
+      // 1. Store under multiple fallback keys so ALL components can read them successfully
+      localStorage.setItem('token', token);
+      localStorage.setItem('access_token', token);
       localStorage.setItem('dex_token', token);
+
+      localStorage.setItem('role', user.role);
+      localStorage.setItem('user_role', user.role);
       localStorage.setItem('dex_user_role', user.role);
       localStorage.setItem('dex_user_name', user.name || '');
 
-      // 2. Direct user straight to their corresponding control dashboard
-      if (user.role === 'SUPER_ADMIN') {
+      // 2. Normalize role check to handle uppercase, lowercase, or hyphens safely
+      const role = user.role.toUpperCase().replace('-', '_');
+
+      // 3. Direct user straight to their corresponding control dashboard
+      if (role === 'SUPER_ADMIN') {
         window.location.href = '/super-admin/dashboard';
-      } else if (user.role === 'ADMIN') {
+      } else if (role === 'ADMIN') {
         window.location.href = '/admin/dashboard';
       } else {
         window.location.href = '/student/dashboard';
