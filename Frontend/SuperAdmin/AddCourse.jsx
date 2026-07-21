@@ -17,6 +17,17 @@ export default function AddCourse({ onNavigate }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // Check multiple fallback keys where the auth token might be saved
+    const token = localStorage.getItem('token') || 
+                  localStorage.getItem('access_token') || 
+                  localStorage.getItem('authToken');
+
+    if (!token) {
+      alert("Authentication token missing. Please log out and log back in as Super Admin.");
+      return;
+    }
+
     try {
       const data = new FormData();
       Object.keys(formData).forEach(key => {
@@ -29,7 +40,7 @@ export default function AddCourse({ onNavigate }) {
         method: 'POST',
         headers: { 
           'Accept': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization': `Bearer ${token}`
         },
         body: data
       });
