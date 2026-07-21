@@ -19,9 +19,16 @@ const completeLogin = (data, onLogin) => {
     throw new Error('Your account has an unrecognized access role. Please contact support.');
   }
 
+  // Store under all fallback keys to prevent mismatches across components
+  localStorage.setItem('token', token);
+  localStorage.setItem('access_token', token);
   localStorage.setItem('dex_token', token);
+
+  localStorage.setItem('role', role);
+  localStorage.setItem('user_role', role);
   localStorage.setItem('dex_user_role', role);
   localStorage.setItem('dex_user_name', user.name || '');
+
   onLogin(normalizedRole);
 };
 
@@ -159,7 +166,7 @@ export const SuperAdminLogin = ({ onNavigate, onLogin }) => {
         body: JSON.stringify({ 
             email, 
             password, 
-            securityCode // FIXED: securityCode is now sent to the server
+            securityCode 
         })
       });
       completeLogin(data, onLogin);
