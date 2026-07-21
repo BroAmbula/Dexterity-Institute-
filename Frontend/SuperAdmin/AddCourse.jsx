@@ -28,7 +28,7 @@ export default function AddCourse({ onNavigate }) {
       const response = await fetch(`${getApiBaseUrl()}/api/super-admin/courses`, {
         method: 'POST',
         headers: { 
-          // Note: Do NOT set Content-Type header when using FormData; browser sets it automatically with boundary
+          'Accept': 'application/json',
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         },
         body: data
