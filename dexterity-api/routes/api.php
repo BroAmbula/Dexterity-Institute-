@@ -10,6 +10,7 @@ use App\Http\Controllers\SuperAdmin\ForensicAuditLogsController;
 use App\Http\Controllers\SuperAdmin\SuperAdminDashboardController;
 use App\Http\Controllers\SuperAdmin\SystemCurriculumController;
 use App\Http\Controllers\SuperAdmin\CourseController;
+use App\Http\Controllers\Payment\PaymentController;
 use Illuminate\Support\Facades\Route;
 
 // ==========================================
@@ -31,6 +32,7 @@ Route::middleware('auth:sanctum')->prefix('student')->group(function () {
     Route::get('/my-tracks', [StudentDashboardController::class, 'getMyTracks']);
     Route::get('/active-courses', [EnrollmentApplicationController::class, 'activeCourses']);
     Route::post('/apply', [EnrollmentApplicationController::class, 'apply']);
+    Route::post('/pay-and-enroll', [PaymentController::class, 'confirmPayment']);
 });
 
 // ==========================================
@@ -40,6 +42,12 @@ Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function ()
     Route::get('/dashboard/stats', [AdminDashboardController::class, 'getStats']);
     Route::get('/enrollments', [AdminEnrollmentController::class, 'index']);
     Route::patch('/enrollments/{enrollment}/status', [AdminEnrollmentController::class, 'updateStatus']);
+    
+    // Scoped student view: Admins only see students enrolled in their courses
+    Route::get('/enrolled-students', [AdminEnrollmentController::class, 'getAssignedStudents']);
+
+    // Allow regular admins to also add courses and attach PDFs
+    Route::post('/courses', [CourseController::class, 'store']);
 });
 
 // ==========================================
@@ -51,7 +59,7 @@ Route::middleware(['auth:sanctum', 'super-admin'])->prefix('super-admin')->group
     Route::patch('/global/exchange-rate', [SystemCurriculumController::class, 'updateExchangeRate']);
     Route::patch('/courses/{course}/toggle-active', [SystemCurriculumController::class, 'toggleStatus']);
     
-    // Course Management
+    // Course & PDF Management for Super Admin
     Route::post('/courses', [CourseController::class, 'store']);
     
     Route::get('/users', [AccessControlController::class, 'index']);

@@ -11,19 +11,27 @@ export default function AddCourse({ onNavigate }) {
     eligibility: '',
     fee_usd: '',
     exchange_rate: '130',
-    is_active: true
+    is_active: true,
+    pdf_file: null
   });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      const data = new FormData();
+      Object.keys(formData).forEach(key => {
+        if (formData[key] !== null) {
+          data.append(key, formData[key]);
+        }
+      });
+
       const response = await fetch(`${getApiBaseUrl()}/api/super-admin/courses`, {
         method: 'POST',
         headers: { 
-          'Content-Type': 'application/json',
+          // Note: Do NOT set Content-Type header when using FormData; browser sets it automatically with boundary
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         },
-        body: JSON.stringify(formData)
+        body: data
       });
 
       if (response.ok) {
@@ -51,6 +59,16 @@ export default function AddCourse({ onNavigate }) {
         </div>
         <input className="w-full p-3 border rounded-lg" placeholder="Eligibility Requirements" required onChange={e => setFormData({...formData, eligibility: e.target.value})} />
         
+        <div>
+          <label className="block text-xs font-bold uppercase text-slate-600 mb-2">Course Syllabus (PDF)</label>
+          <input 
+            type="file" 
+            accept="application/pdf"
+            onChange={(e) => setFormData({ ...formData, pdf_file: e.target.files[0] })}
+            className="w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+          />
+        </div>
+
         <button type="submit" className="w-full bg-blue-600 text-white font-bold py-3 rounded-xl hover:bg-blue-700">
           Save Course
         </button>

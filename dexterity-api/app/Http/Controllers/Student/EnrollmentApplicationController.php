@@ -26,7 +26,7 @@ class EnrollmentApplicationController extends Controller
     public function apply(Request $request): JsonResponse
     {
         $request->validate([
-            'course_id' => 'required|uuid|exists:courses,id'
+            'course_id' => 'required|exists:courses,id'
         ]);
 
         $userId = Auth::id();
