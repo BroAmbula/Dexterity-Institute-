@@ -33,7 +33,9 @@ export const getAuthHeaders = (token = null) => {
 
 export const apiRequest = async (path, options = {}) => {
   const token = options.token ?? localStorage.getItem('dex_token');
+  
   const response = await fetch(`${getApiBaseUrl()}${path}`, {
+    credentials: 'include', // <--- THIS LINE FIXES THE CROSS-DOMAIN COOKIE ISSUE
     ...options,
     headers: {
       ...getAuthHeaders(token),
