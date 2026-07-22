@@ -17,7 +17,9 @@ export default function SuperAdminDashboard({ onNavigate }) {
     const loadMetrics = async () => {
       try {
         const token = localStorage.getItem('token') || localStorage.getItem('auth_token');
-        const baseUrl = import.meta.env.VITE_API_BASE_URL || '';
+        
+        // Explicitly target your Railway backend URL
+        const baseUrl = import.meta.env.VITE_API_BASE_URL || 'https://dexterity-institute-production.up.railway.app';
         
         const response = await fetch(`${baseUrl}/api/super-admin/dashboard/stats`, {
           method: 'GET',
