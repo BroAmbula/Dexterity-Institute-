@@ -13,12 +13,16 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
+        // Ensure CORS middleware runs globally for API requests
+        $middleware->append(\Illuminate\Http\Middleware\HandleCors::class);
+
+        // Register custom role middleware aliases
         $middleware->alias([
             'admin' => \App\Http\Middleware\EnsureUserIsAdmin::class,
             'super-admin' => \App\Http\Middleware\EnsureUserIsSuperAdmin::class,
         ]);
     })
-    ->withExceptions(function (Exceptions $exceptions): void {
+    ->withExceptions(function (Exceptions $exceptions) {
         $exceptions->shouldRenderJsonWhen(
             fn (Request $request) => $request->is('api/*'),
         );
