@@ -40,6 +40,7 @@ Route::middleware('auth:sanctum')->prefix('student')->group(function () {
 // ==========================================
 Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function () {
     Route::get('/dashboard/stats', [AdminDashboardController::class, 'getStats']);
+    Route::get('/stats', [AdminDashboardController::class, 'getStats']); // Alias
     Route::get('/enrollments', [AdminEnrollmentController::class, 'index']);
     Route::patch('/enrollments/{enrollment}/status', [AdminEnrollmentController::class, 'updateStatus']);
     
@@ -55,6 +56,7 @@ Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function ()
 // ==========================================
 Route::middleware(['auth:sanctum', 'super-admin'])->prefix('super-admin')->group(function () {
     Route::get('/dashboard/stats', [SuperAdminDashboardController::class, 'getMetrics']);
+    Route::get('/stats', [SuperAdminDashboardController::class, 'getMetrics']); // Alias to prevent frontend path mismatches
     
     // Add Admin endpoint cleanly integrated here:
     Route::post('/create-admin', [SuperAdminDashboardController::class, 'storeAdmin']);
