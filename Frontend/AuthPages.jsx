@@ -25,9 +25,10 @@ const completeLogin = (data, onLogin) => {
   localStorage.setItem('dex_token', token);
 
   localStorage.setItem('role', role);
-  localStorage.setItem('user_role', role);
+  localStorage.setItem('user_role', normalizedRole);
   localStorage.setItem('dex_user_role', role);
   localStorage.setItem('dex_user_name', user.name || '');
+  localStorage.setItem('user', JSON.stringify(user));
 
   onLogin(normalizedRole);
 };
