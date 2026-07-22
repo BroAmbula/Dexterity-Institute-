@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { apiRequest } from '../apiConfig';
 
 export default function SuperAdminDashboard({ onNavigate }) {
   const [metrics, setMetrics] = useState({
@@ -17,11 +16,28 @@ export default function SuperAdminDashboard({ onNavigate }) {
   useEffect(() => {
     const loadMetrics = async () => {
       try {
-        const data = await apiRequest('/api/super-admin/dashboard/stats');
-        setMetrics(data.metrics);
+        const token = localStorage.getItem('token') || localStorage.getItem('auth_token');
+        const baseUrl = import.meta.env.VITE_API_BASE_URL || '';
+        
+        const response = await fetch(`${baseUrl}/api/super-admin/dashboard/stats`, {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+          }
+        });
+
+        if (!response.ok) {
+          const errData = await response.json().catch(() => ({}));
+          throw new Error(errData.message || `Failed to fetch metrics (Status: ${response.status})`);
+        }
+
+        const data = await response.json();
+        setMetrics(data.metrics || {});
         setSchoolDistribution((data.distribution || []).map((item) => ({
           ...item,
-          color: item.name.includes('Career') ? 'bg-blue-600' : item.name.includes('Leadership') ? 'bg-amber-500' : item.name.includes('Personal') ? 'bg-purple-600' : 'bg-emerald-600'
+          color: item.name?.includes('Career') ? 'bg-blue-600' : item.name?.includes('Leadership') ? 'bg-amber-500' : item.name?.includes('Personal') ? 'bg-purple-600' : 'bg-emerald-600'
         })));
       } catch (err) {
         setError(err.message);
@@ -56,27 +72,27 @@ export default function SuperAdminDashboard({ onNavigate }) {
           
           <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
             <span className="text-xs font-bold text-gray-400 uppercase">Revenue (USD)</span>
-            <h3 className="text-2xl font-black text-gray-900 mt-2">${metrics.revenue_usd.toLocaleString()}</h3>
+            <h3 className="text-2xl font-black text-gray-900 mt-2">${(metrics.revenue_usd || 0).toLocaleString()}</h3>
           </div>
 
           <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
             <span className="text-xs font-bold text-gray-400 uppercase">Revenue (KES)</span>
-            <h3 className="text-2xl font-black text-emerald-600 mt-2">KSh {metrics.revenue_kes.toLocaleString()}</h3>
+            <h3 className="text-2xl font-black text-emerald-600 mt-2">KSh {(metrics.revenue_kes || 0).toLocaleString()}</h3>
           </div>
 
           <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
             <span className="text-xs font-bold text-gray-400 uppercase">Active Students</span>
-            <h3 className="text-2xl font-black text-gray-900 mt-2">{metrics.total_students}</h3>
+            <h3 className="text-2xl font-black text-gray-900 mt-2">{metrics.total_students || 0}</h3>
           </div>
 
           <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
             <span className="text-xs font-bold text-gray-400 uppercase">Pending Applications</span>
-            <h3 className="text-2xl font-black text-amber-500 mt-2">{metrics.pending_reviews}</h3>
+            <h3 className="text-2xl font-black text-amber-500 mt-2">{metrics.pending_reviews || 0}</h3>
           </div>
 
           <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
             <span className="text-xs font-bold text-gray-400 uppercase">Conversion Rate</span>
-            <h3 className="text-2xl font-black text-blue-600 mt-2">{metrics.conversion_rate}%</h3>
+            <h3 className="text-2xl font-black text-blue-600 mt-2">{metrics.conversion_rate || 0}%</h3>
           </div>
 
         </div>
