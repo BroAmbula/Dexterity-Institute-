@@ -6,12 +6,11 @@ use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 
 class AuthController extends Controller
 {
-    // 1. Registration (Auto-verified & Auto-login)
+    // 1. Registration (Auto-verified, Auto-login, Forced Student Role)
     public function register(Request $request): JsonResponse
     {
         $fields = $request->validate([
@@ -27,9 +26,11 @@ class AuthController extends Controller
             'name' => $fields['first_name'] . ' ' . $fields['last_name'],
             'email' => $fields['email'],
             'password' => Hash::make($fields['password']),
-            'role' => 'STUDENT', 
+            'role' => 'STUDENT', // Force public signups to student role
             'status' => 'ACTIVE',
-            'email_verified_at' => now(), // Automatically mark as verified
+            'is_admin' => false,       // Prevent self-escalation
+            'is_super_admin' => false, // Prevent self-escalation
+            'email_verified_at' => now(), 
         ]);
 
         // Generate Sanctum access token for immediate login

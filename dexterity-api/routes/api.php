@@ -55,6 +55,10 @@ Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function ()
 // ==========================================
 Route::middleware(['auth:sanctum', 'super-admin'])->prefix('super-admin')->group(function () {
     Route::get('/dashboard/stats', [SuperAdminDashboardController::class, 'getMetrics']);
+    
+    // Add Admin endpoint cleanly integrated here:
+    Route::post('/create-admin', [SuperAdminDashboardController::class, 'storeAdmin']);
+
     Route::get('/curriculum', [SystemCurriculumController::class, 'index']);
     Route::patch('/global/exchange-rate', [SystemCurriculumController::class, 'updateExchangeRate']);
     Route::patch('/courses/{course}/toggle-active', [SystemCurriculumController::class, 'toggleStatus']);
