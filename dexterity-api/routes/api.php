@@ -40,14 +40,10 @@ Route::middleware('auth:sanctum')->prefix('student')->group(function () {
 // ==========================================
 Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function () {
     Route::get('/dashboard/stats', [AdminDashboardController::class, 'getStats']);
-    Route::get('/stats', [AdminDashboardController::class, 'getStats']); // Alias
+    Route::get('/stats', [AdminDashboardController::class, 'getStats']);
     Route::get('/enrollments', [AdminEnrollmentController::class, 'index']);
     Route::patch('/enrollments/{enrollment}/status', [AdminEnrollmentController::class, 'updateStatus']);
-    
-    // Scoped student view: Admins only see students enrolled in their courses
     Route::get('/enrolled-students', [AdminEnrollmentController::class, 'getAssignedStudents']);
-
-    // Allow regular admins to also add courses and attach PDFs
     Route::post('/courses', [CourseController::class, 'store']);
 });
 
@@ -56,23 +52,15 @@ Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function ()
 // ==========================================
 Route::middleware(['auth:sanctum', 'super-admin'])->prefix('super-admin')->group(function () {
     Route::get('/dashboard/stats', [SuperAdminDashboardController::class, 'getMetrics']);
-    Route::get('/stats', [SuperAdminDashboardController::class, 'getMetrics']); // Alias to prevent frontend path mismatches
-    
-    // Add Admin endpoint cleanly integrated here:
+    Route::get('/stats', [SuperAdminDashboardController::class, 'getMetrics']);
     Route::post('/create-admin', [SuperAdminDashboardController::class, 'storeAdmin']);
-
     Route::get('/curriculum', [SystemCurriculumController::class, 'index']);
     Route::patch('/global/exchange-rate', [SystemCurriculumController::class, 'updateExchangeRate']);
     Route::patch('/courses/{course}/toggle-active', [SystemCurriculumController::class, 'toggleStatus']);
-    
-    // Course & PDF Management for Super Admin
     Route::post('/courses', [CourseController::class, 'store']);
-    
-    // User & Staff Access Control
     Route::get('/users', [AccessControlController::class, 'index']);
     Route::post('/users', [AccessControlController::class, 'store']);
     Route::patch('/users/{user}/role', [AccessControlController::class, 'changeRole']);
     Route::patch('/users/{user}/toggle-ban', [AccessControlController::class, 'toggleBan']);
-    
     Route::get('/audit-logs', [ForensicAuditLogsController::class, 'index']);
 });
