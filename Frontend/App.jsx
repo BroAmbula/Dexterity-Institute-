@@ -25,6 +25,7 @@ import AdminDashboard from './Admin/AdminDashboard';
 // Super Admin Imports
 import SuperAdminDashboard from './SuperAdmin/SuperAdminDashboard';
 import AddCourse from './SuperAdmin/AddCourse';
+import StaffAccess from './SuperAdmin/StaffAccess';
 
 export default function App() {
   const [currentView, setCurrentView] = useState(() => localStorage.getItem('currentView') || 'home');
@@ -66,7 +67,8 @@ export default function App() {
 
   const superAdminLinks = [
     { label: 'Command Center', id: 'super-admin-dashboard' },
-    { label: 'Add Course', id: 'add-course' }
+    { label: 'Add Course', id: 'add-course' },
+    { label: 'Staff Access', id: 'staff-access' }
   ];
 
   const adminLinks = [
@@ -106,14 +108,14 @@ export default function App() {
       { id: 'admin-enrollments', role: 'admin' },
       { id: 'application-review', role: 'admin' },
       { id: 'super-admin-dashboard', role: 'super-admin' },
-      { id: 'add-course', role: 'super-admin' }
+      { id: 'add-course', role: 'super-admin' },
+      { id: 'staff-access', role: 'super-admin' }
     ];
 
     const restrictedView = protectedRoutes.find(route => route.id === viewId);
 
-    // Enforce role check
+    // Enforce role check silently without triggering annoying alerts
     if (restrictedView && userRole !== restrictedView.role) {
-      alert(`Access Denied: This area requires ${restrictedView.role} privileges.`);
       return; 
     }
 
@@ -163,6 +165,7 @@ export default function App() {
       case 'super-admin-dashboard': return <SuperAdminDashboard onNavigate={handleNavigation} />;
       case 'super-admin-login': return <SuperAdminLogin onNavigate={handleNavigation} onLogin={handleLogin} />;
       case 'add-course': return <AddCourse onNavigate={handleNavigation} />;
+      case 'staff-access': return <StaffAccess onNavigate={handleNavigation} />;
 
       default: return <LandingPage onNavigate={handleNavigation} />;
     }
@@ -194,7 +197,6 @@ export default function App() {
         </div>
 
         <div className="hidden md:flex items-center gap-3">
-          {/* Show Admin Login & Partner buttons only if NOT logged in */}
           {!userRole && (
             <>
               <button 
@@ -214,7 +216,6 @@ export default function App() {
             </>
           )}
 
-          {/* Logout button appears when logged in */}
           {userRole && (
             <button onClick={handleLogout} className="text-red-600 border border-red-300 px-4 py-2 rounded-lg text-xs font-bold hover:bg-red-50 transition">
               Logout
