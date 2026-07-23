@@ -37,7 +37,7 @@ export default function Login() {
         throw new Error('The server returned an incomplete login response. Please try again or contact support.');
       }
 
-      // 1. Store under multiple fallback keys so ALL components can read them successfully
+      // 1. Store under multiple fallback keys so all components can read them successfully
       localStorage.setItem('token', token);
       localStorage.setItem('access_token', token);
       localStorage.setItem('dex_token', token);
@@ -48,12 +48,12 @@ export default function Login() {
       localStorage.setItem('dex_user_name', user.name || '');
 
       // 2. Normalize role check to handle uppercase, lowercase, or hyphens safely
-      const role = user.role.toUpperCase().replace('-', '_');
+      const role = user.role.toUpperCase().replace(/-/g, '_');
 
       // 3. Direct user straight to their corresponding control dashboard
       if (role === 'SUPER_ADMIN') {
         window.location.href = '/super-admin/dashboard';
-      } else if (role === 'ADMIN') {
+      } else if (role === 'ADMIN' || role === 'OPERATIONS_ADMIN') {
         window.location.href = '/admin/dashboard';
       } else {
         window.location.href = '/student/dashboard';
@@ -67,11 +67,11 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-6 text-gray-800">
-      <div className="max-w-md w-full bg-white p-8 rounded-2xl shadow-sm border border-gray-100">
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4 sm:p-6 text-gray-800">
+      <div className="max-w-md w-full bg-white p-6 sm:p-8 rounded-2xl shadow-sm border border-gray-100">
         
         {/* Title */}
-        <div className="text-center mb-8">
+        <div className="text-center mb-6 sm:mb-8">
           <h2 className="text-2xl font-black text-gray-950">Access Dexterity</h2>
           <p className="text-xs text-gray-400 mt-1">Provide credentials to enter your management or student space.</p>
         </div>
@@ -111,7 +111,7 @@ export default function Login() {
 
           <button 
             type="submit" 
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 rounded-xl transition text-sm mt-6"
+            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 rounded-xl transition text-sm mt-6 shadow-md"
             disabled={loading}
           >
             {loading ? 'Verifying Credentials...' : 'Access Dashboard ➔'}
