@@ -15,7 +15,6 @@ export default function SuperAdminPanel({ onLogout }) {
           <span className="font-black text-gray-950 text-base uppercase tracking-wider">Super Admin Portal</span>
         </div>
 
-        {/* Navbar Links fully bound to internal state so they never redirect away */}
         <nav className="flex flex-wrap items-center gap-2">
           <button 
             onClick={() => setCurrentTab('dashboard')}
@@ -56,7 +55,7 @@ export default function SuperAdminPanel({ onLogout }) {
         </nav>
       </header>
 
-      {/* Main View Renderer - Switches instantly without reloading the page */}
+      {/* Main View Renderer */}
       <main className="flex-1">
         {currentTab === 'dashboard' && <SuperAdminDashboard onNavigate={setCurrentTab} />}
         {currentTab === 'add-student' && <AddStudent onBack={() => setCurrentTab('dashboard')} />}

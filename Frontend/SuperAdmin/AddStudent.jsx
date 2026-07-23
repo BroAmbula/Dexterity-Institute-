@@ -1,96 +1,108 @@
 import React, { useState } from 'react';
-import API from '../../utils/axios';
 
 export default function AddStudent({ onBack }) {
   const [formData, setFormData] = useState({ name: '', email: '', password: '', phone: '' });
   const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState('');
+  const [message, setMessage] = useState('');
   const [error, setError] = useState('');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
+    setMessage('');
     setError('');
-    setSuccess('');
 
     try {
-      await API.post('/super-admin/students', formData);
-      setSuccess('Student successfully enrolled and registered!');
+      const token = localStorage.getItem('token') || localStorage.getItem('auth_token');
+      const baseUrl = import.meta.env.VITE_API_BASE_URL || 'https://dexterity-institute-production.up.railway.app';
+
+      const response = await fetch(`${baseUrl}/api/super-admin/students`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(formData)
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Failed to enroll student.');
+      }
+
+      setMessage('Student successfully enrolled!');
       setFormData({ name: '', email: '', password: '', phone: '' });
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to register student.');
+      setError(err.message);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="p-6 max-w-2xl mx-auto bg-white rounded-2xl shadow-sm border border-gray-100 my-6 text-gray-800">
+    <div className="p-6 max-w-4xl mx-auto">
       <div className="flex justify-between items-center mb-6">
-        <div>
-          <h2 className="text-2xl font-extrabold text-gray-950">Enroll Student Manually</h2>
-          <p className="text-xs text-gray-400 mt-1">Create an active student profile directly into the system database.</p>
-        </div>
-        {onBack && (
-          <button onClick={onBack} className="text-xs font-bold text-blue-600 hover:underline">
-            ← Back to Command Center
-          </button>
-        )}
+        <h1 className="text-2xl font-black text-gray-950">Enroll New Student</h1>
+        <button onClick={onBack} className="text-xs font-bold text-gray-500 hover:text-gray-900">
+          ← Back to Dashboard
+        </button>
       </div>
 
-      {success && <div className="bg-emerald-50 text-emerald-700 p-3.5 rounded-xl mb-6 text-xs font-bold">✅ {success}</div>}
-      {error && <div className="bg-red-50 text-red-700 p-3.5 rounded-xl mb-6 text-xs font-bold">⚠️ {error}</div>}
+      {message && <div className="bg-emerald-50 text-emerald-700 p-4 rounded-xl mb-4 text-sm font-bold">{message}</div>}
+      {error && <div className="bg-red-50 text-red-700 p-4 rounded-xl mb-4 text-sm font-bold">{error}</div>}
 
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 space-y-4">
         <div>
-          <label className="text-xs font-bold text-gray-400 uppercase block mb-1">Full Name</label>
+          <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Full Name</label>
           <input 
             type="text" 
-            placeholder="John Doe"
-            value={formData.name} 
-            onChange={e => setFormData({...formData, name: e.target.value})} 
-            className="w-full border border-gray-200 p-3 rounded-xl text-sm focus:outline-blue-600 font-semibold" 
-            required 
+            required
+            value={formData.name}
+            onChange={(e) => setFormData({...formData, name: e.target.value})}
+            className="w-full p-3 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600"
           />
         </div>
+
         <div>
-          <label className="text-xs font-bold text-gray-400 uppercase block mb-1">Email Address</label>
+          <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Email Address</label>
           <input 
             type="email" 
-            placeholder="student@dexterity.com"
-            value={formData.email} 
-            onChange={e => setFormData({...formData, email: e.target.value})} 
-            className="w-full border border-gray-200 p-3 rounded-xl text-sm focus:outline-blue-600 font-semibold" 
-            required 
+            required
+            value={formData.email}
+            onChange={(e) => setFormData({...formData, email: e.target.value})}
+            className="w-full p-3 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600"
           />
         </div>
+
         <div>
-          <label className="text-xs font-bold text-gray-400 uppercase block mb-1">Temporary Password</label>
+          <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Temporary Password</label>
           <input 
             type="password" 
-            placeholder="••••••••"
-            value={formData.password} 
-            onChange={e => setFormData({...formData, password: e.target.value})} 
-            className="w-full border border-gray-200 p-3 rounded-xl text-sm focus:outline-blue-600 font-semibold" 
-            required 
+            required
+            value={formData.password}
+            onChange={(e) => setFormData({...formData, password: e.target.value})}
+            className="w-full p-3 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600"
           />
         </div>
+
         <div>
-          <label className="text-xs font-bold text-gray-400 uppercase block mb-1">Phone Number</label>
+          <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Phone Number</label>
           <input 
             type="text" 
-            placeholder="+2547XXXXXXXX"
-            value={formData.phone} 
-            onChange={e => setFormData({...formData, phone: e.target.value})} 
-            className="w-full border border-gray-200 p-3 rounded-xl text-sm focus:outline-blue-600 font-semibold" 
+            value={formData.phone}
+            onChange={(e) => setFormData({...formData, phone: e.target.value})}
+            className="w-full p-3 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600"
           />
         </div>
+
         <button 
           type="submit" 
-          disabled={loading} 
-          className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 rounded-xl transition text-sm mt-4 shadow-md"
+          disabled={loading}
+          className="w-full py-3 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 transition"
         >
-          {loading ? 'Saving Student Profile...' : 'Complete Manual Enrollment ➔'}
+          {loading ? 'Enrolling...' : 'Save Student Account'}
         </button>
       </form>
     </div>

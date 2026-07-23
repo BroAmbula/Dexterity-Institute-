@@ -23,33 +23,101 @@ import PaymentPortal from './Student/PaymentPortal';
 import AdminDashboard from './Admin/AdminDashboard';
 
 // Super Admin Imports
-import SuperAdminDashboard from './SuperAdmin/SuperAdminDashboard';
-import AddCourse from './SuperAdmin/AddCourse';
-import StaffAccess from './SuperAdmin/StaffAccess';
+import SuperAdminPanel from './Frontend/SuperAdmin/SuperAdminPanel';
 
 export default function App() {
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [currentView, setCurrentView] = useState(() => localStorage.getItem('currentView') || 'home');
   const [userRole, setUserRole] = useState(() => localStorage.getItem('user_role') || null);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [selectedCourse, setSelectedCourse] = useState(null);
   const [enrolledCourses, setEnrolledCourses] = useState([]);
 
-  // Fetch student tracks
+  useEffect(() => {
+    const storedUser = localStorage.getItem('user');
+    const token = localStorage.getItem('token') || localStorage.getItem('auth_token');
+    const storedRole = localStorage.getItem('user_role');
+
+    if (storedUser && token) {
+      try {
+        const parsedUser = JSON.parse(storedUser);
+        setUser(parsedUser);
+        if (parsedUser.role) {
+          setUserRole(parsedUser.role);
+          localStorage.setItem('user_role', parsedUser.role);
+        }
+      } catch (e) {
+        localStorage.removeItem('user');
+        localStorage.removeItem('token');
+        localStorage.removeItem('auth_token');
+        localStorage.removeItem('user_role');
+      }
+    } else if (storedRole) {
+      setUserRole(storedRole);
+    }
+    setLoading(false);
+  }, []);
+
+  // Fetch student tracks if user is student
   useEffect(() => {
     if (userRole === 'student') {
       const fetchTracks = async () => {
         try {
-          const token = localStorage.getItem('token');
+          const token = localStorage.getItem('token') || localStorage.getItem('auth_token');
           const response = await fetch(`${getApiBaseUrl()}/api/student/my-tracks`, {
             headers: { 'Authorization': `Bearer ${token}` }
           });
           const data = await response.json();
           if (response.ok) setEnrolledCourses(data);
-        } catch (err) { console.error("Error fetching tracks", err); }
+        } catch (err) { 
+          console.error("Error fetching tracks", err); 
+        }
       };
       fetchTracks();
     }
   }, [userRole]);
+
+  const handleLogout = () => {
+    localStorage.clear();
+    setUser(null);
+    setUserRole(null);
+    setCurrentView('home');
+  };
+
+  const handleLogin = (role, userData = null) => {
+    setUserRole(role);
+    localStorage.setItem('user_role', role);
+    if (userData) {
+      setUser(userData);
+      localStorage.setItem('user', JSON.stringify(userData));
+    }
+    if (role === 'student') handleNavigation('student-dashboard');
+    else if (role === 'admin') handleNavigation('admin-dashboard');
+    else if (role === 'super-admin') handleNavigation('super-admin-dashboard');
+    else handleNavigation('home');
+  };
+
+  const handleNavigation = (viewId, data = null) => {
+    if (data) setSelectedCourse(data);
+    localStorage.setItem('currentView', viewId);
+    setCurrentView(viewId);
+    setMobileOpen(false);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 font-bold text-gray-500">
+        Loading Dexterity Institute...
+      </div>
+    );
+  }
+
+  // If user is a super-admin, delegate completely to the SuperAdminPanel
+  if (userRole === 'super-admin' || (user && user.role === 'super-admin')) {
+    return <SuperAdminPanel onLogout={handleLogout} />;
+  }
 
   // Navigation Links based on authentication status & role
   const publicLinks = [
@@ -65,12 +133,6 @@ export default function App() {
     { label: 'Payment Portal', id: 'student-payments' }
   ];
 
-  const superAdminLinks = [
-    { label: 'Command Center', id: 'super-admin-dashboard' },
-    { label: 'Add Course', id: 'add-course' },
-    { label: 'Staff Access', id: 'staff-access' }
-  ];
-
   const adminLinks = [
     { label: 'Dashboard', id: 'admin-dashboard' }
   ];
@@ -79,11 +141,9 @@ export default function App() {
     if (!userRole) return publicLinks;
     if (userRole === 'student') return studentLinks;
     if (userRole === 'admin') return adminLinks;
-    if (userRole === 'super-admin') return superAdminLinks;
     return publicLinks;
   };
 
-  // Smart Logo / Home click redirects to dashboard if logged in
   const handleHomeClick = () => {
     if (!userRole) {
       handleNavigation('home');
@@ -91,53 +151,7 @@ export default function App() {
       handleNavigation('student-dashboard');
     } else if (userRole === 'admin') {
       handleNavigation('admin-dashboard');
-    } else if (userRole === 'super-admin') {
-      handleNavigation('super-admin-dashboard');
     }
-  };
-
-  const handleNavigation = (viewId, data = null) => {
-    if (data) setSelectedCourse(data);
-
-    // Define protected routes
-    const protectedRoutes = [
-      { id: 'student-dashboard', role: 'student' },
-      { id: 'student-courses', role: 'student' },
-      { id: 'student-payments', role: 'student' },
-      { id: 'admin-dashboard', role: 'admin' },
-      { id: 'admin-enrollments', role: 'admin' },
-      { id: 'application-review', role: 'admin' },
-      { id: 'super-admin-dashboard', role: 'super-admin' },
-      { id: 'add-course', role: 'super-admin' },
-      { id: 'staff-access', role: 'super-admin' }
-    ];
-
-    const restrictedView = protectedRoutes.find(route => route.id === viewId);
-
-    // Enforce role check silently without triggering annoying alerts
-    if (restrictedView && userRole !== restrictedView.role) {
-      return; 
-    }
-
-    localStorage.setItem('currentView', viewId);
-    setCurrentView(viewId);
-    setMobileOpen(false);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
-  const handleLogin = (role) => {
-    setUserRole(role);
-    localStorage.setItem('user_role', role); 
-    if (role === 'student') handleNavigation('student-dashboard');
-    else if (role === 'admin') handleNavigation('admin-dashboard');
-    else if (role === 'super-admin') handleNavigation('super-admin-dashboard');
-    else handleNavigation('home');
-  };
-
-  const handleLogout = () => {
-    localStorage.clear();
-    setUserRole(null);
-    handleNavigation('home');
   };
 
   const renderActiveView = () => {
@@ -156,17 +170,12 @@ export default function App() {
       case 'student-dashboard': return <StudentDashboard onNavigate={handleNavigation} enrolledCourses={enrolledCourses} />;
       case 'student-courses': return <CourseCatalog onNavigate={handleNavigation} />;
       case 'student-payments': return <PaymentPortal onNavigate={handleNavigation} course={selectedCourse} />;
-      case 'student-login': return <StudentLogin onNavigate={handleNavigation} onLogin={handleLogin} />;
+      case 'student-login': return <StudentLogin onNavigate={handleNavigation} onLogin={(role, data) => handleLogin(role, data)} />;
       
       // Admin Views
       case 'admin-dashboard': return <AdminDashboard onNavigate={handleNavigation} />;
+      case 'super-admin-login': return <SuperAdminLogin onNavigate={handleNavigation} onLogin={(role, data) => handleLogin(role, data)} />;
       
-      // Super Admin Views
-      case 'super-admin-dashboard': return <SuperAdminDashboard onNavigate={handleNavigation} />;
-      case 'super-admin-login': return <SuperAdminLogin onNavigate={handleNavigation} onLogin={handleLogin} />;
-      case 'add-course': return <AddCourse onNavigate={handleNavigation} />;
-      case 'staff-access': return <StaffAccess onNavigate={handleNavigation} />;
-
       default: return <LandingPage onNavigate={handleNavigation} />;
     }
   };
