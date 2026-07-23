@@ -10,7 +10,6 @@ use App\Http\Controllers\SuperAdmin\ForensicAuditLogsController;
 use App\Http\Controllers\SuperAdmin\SuperAdminDashboardController;
 use App\Http\Controllers\SuperAdmin\SystemCurriculumController;
 use App\Http\Controllers\SuperAdmin\CourseController;
-use App\Http\Controllers\SuperAdminController;
 use App\Http\Controllers\BlogController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\Payment\PaymentController;
@@ -54,22 +53,27 @@ Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function ()
 // 4. ABSOLUTE SYSTEM SECURITY (SUPER ADMIN)
 // ==========================================
 Route::middleware(['auth:sanctum', 'super-admin'])->prefix('super-admin')->group(function () {
-    Route::get('/dashboard/stats', [SuperAdminController::class, 'dashboardStats']);
-    Route::get('/stats', [SuperAdminController::class, 'dashboardStats']);
-    Route::get('/metrics', [SuperAdminController::class, 'dashboardStats']); // Added to resolve frontend 404 mismatch
+    Route::get('/dashboard/stats', [SuperAdminDashboardController::class, 'dashboardStats']);
+    Route::get('/stats', [SuperAdminDashboardController::class, 'dashboardStats']);
+    Route::get('/metrics', [SuperAdminDashboardController::class, 'dashboardStats']);
+    
+    Route::post('/admin', [SuperAdminDashboardController::class, 'storeAdmin']);
     Route::post('/create-admin', [SuperAdminDashboardController::class, 'storeAdmin']);
+    
     Route::get('/curriculum', [SystemCurriculumController::class, 'index']);
     Route::patch('/global/exchange-rate', [SystemCurriculumController::class, 'updateExchangeRate']);
     Route::patch('/courses/{course}/toggle-active', [SystemCurriculumController::class, 'toggleStatus']);
     Route::post('/courses', [CourseController::class, 'store']);
+    
     Route::get('/users', [AccessControlController::class, 'index']);
     Route::post('/users', [AccessControlController::class, 'store']);
     Route::patch('/users/{user}/role', [AccessControlController::class, 'changeRole']);
     Route::patch('/users/{user}/toggle-ban', [AccessControlController::class, 'toggleBan']);
+    
     Route::get('/audit-logs', [ForensicAuditLogsController::class, 'index']);
 
     // --- SUPER ADMIN CAPABILITIES ---
-    Route::post('/students', [SuperAdminController::class, 'storeStudent']);
+    Route::post('/students', [SuperAdminDashboardController::class, 'storeStudent']);
     Route::post('/blogs', [BlogController::class, 'store']);
     Route::post('/products', [ProductController::class, 'store']);
 });
