@@ -67,7 +67,7 @@ Route::middleware(['auth:sanctum', 'super-admin'])->prefix('super-admin')->group
     Route::patch('/users/{user}/toggle-ban', [AccessControlController::class, 'toggleBan']);
     Route::get('/audit-logs', [ForensicAuditLogsController::class, 'index']);
 
-    // --- NEW SUPER ADMIN CAPABILITIES ---
+    // --- SUPER ADMIN CAPABILITIES ---
     Route::post('/students', [SuperAdminController::class, 'storeStudent']);
     Route::post('/blogs', [BlogController::class, 'store']);
     Route::post('/products', [ProductController::class, 'store']);
