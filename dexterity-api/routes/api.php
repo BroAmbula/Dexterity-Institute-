@@ -56,6 +56,7 @@ Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function ()
 Route::middleware(['auth:sanctum', 'super-admin'])->prefix('super-admin')->group(function () {
     Route::get('/dashboard/stats', [SuperAdminController::class, 'dashboardStats']);
     Route::get('/stats', [SuperAdminController::class, 'dashboardStats']);
+    Route::get('/metrics', [SuperAdminController::class, 'dashboardStats']); // Added to resolve frontend 404 mismatch
     Route::post('/create-admin', [SuperAdminDashboardController::class, 'storeAdmin']);
     Route::get('/curriculum', [SystemCurriculumController::class, 'index']);
     Route::patch('/global/exchange-rate', [SystemCurriculumController::class, 'updateExchangeRate']);

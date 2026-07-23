@@ -35,6 +35,12 @@ class SuperAdminDashboardController extends Controller
         ]);
     }
 
+    // Alias to prevent route method mismatches in api.php
+    public function dashboardStats(Request $request)
+    {
+        return $this->getMetrics($request);
+    }
+
     public function storeAdmin(Request $request)
     {
         $request->validate([
@@ -47,7 +53,7 @@ class SuperAdminDashboardController extends Controller
             'name' => $request->name,
             'email' => $request->email,
             'password' => bcrypt($request->password),
-            'role' => 'admin', // or super-admin depending on your schema
+            'role' => 'admin',
         ]);
 
         return response()->json([
