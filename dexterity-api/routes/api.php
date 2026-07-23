@@ -10,6 +10,9 @@ use App\Http\Controllers\SuperAdmin\ForensicAuditLogsController;
 use App\Http\Controllers\SuperAdmin\SuperAdminDashboardController;
 use App\Http\Controllers\SuperAdmin\SystemCurriculumController;
 use App\Http\Controllers\SuperAdmin\CourseController;
+use App\Http\Controllers\SuperAdminController;
+use App\Http\Controllers\BlogController;
+use App\Http\Controllers\ProductController;
 use App\Http\Controllers\Payment\PaymentController;
 use Illuminate\Support\Facades\Route;
 
@@ -51,8 +54,8 @@ Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function ()
 // 4. ABSOLUTE SYSTEM SECURITY (SUPER ADMIN)
 // ==========================================
 Route::middleware(['auth:sanctum', 'super-admin'])->prefix('super-admin')->group(function () {
-    Route::get('/dashboard/stats', [SuperAdminDashboardController::class, 'getMetrics']);
-    Route::get('/stats', [SuperAdminDashboardController::class, 'getMetrics']);
+    Route::get('/dashboard/stats', [SuperAdminController::class, 'dashboardStats']);
+    Route::get('/stats', [SuperAdminController::class, 'dashboardStats']);
     Route::post('/create-admin', [SuperAdminDashboardController::class, 'storeAdmin']);
     Route::get('/curriculum', [SystemCurriculumController::class, 'index']);
     Route::patch('/global/exchange-rate', [SystemCurriculumController::class, 'updateExchangeRate']);
@@ -63,4 +66,12 @@ Route::middleware(['auth:sanctum', 'super-admin'])->prefix('super-admin')->group
     Route::patch('/users/{user}/role', [AccessControlController::class, 'changeRole']);
     Route::patch('/users/{user}/toggle-ban', [AccessControlController::class, 'toggleBan']);
     Route::get('/audit-logs', [ForensicAuditLogsController::class, 'index']);
+
+    // --- NEW SUPER ADMIN CAPABILITIES ---
+    Route::post('/students', [SuperAdminController::class, 'storeStudent']);
+    Route::post('/blogs', [BlogController::class, 'store']);
+    Route::post('/products', [ProductController::class, 'store']);
 });
+
+// Secure Download Route for Paid Users / Instructors
+Route::middleware(['auth:sanctum'])->get('/download/{product}', [ProductController::class, 'download']);

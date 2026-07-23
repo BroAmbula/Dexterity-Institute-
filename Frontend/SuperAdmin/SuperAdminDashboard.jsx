@@ -17,8 +17,6 @@ export default function SuperAdminDashboard({ onNavigate }) {
     const loadMetrics = async () => {
       try {
         const token = localStorage.getItem('token') || localStorage.getItem('auth_token');
-        
-        // Explicitly target your Railway backend URL
         const baseUrl = import.meta.env.VITE_API_BASE_URL || 'https://dexterity-institute-production.up.railway.app';
         
         const response = await fetch(`${baseUrl}/api/super-admin/dashboard/stats`, {
@@ -126,32 +124,41 @@ export default function SuperAdminDashboard({ onNavigate }) {
             </div>
           </div>
 
-          {/* Quick Actions Panel */}
+          {/* Quick Actions Panel Connected to Navigation */}
           <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
             <h2 className="text-lg font-bold text-gray-950 mb-4">Super Admin Tools</h2>
             <p className="text-xs text-gray-500 mb-6">Direct access to critical administrative pipelines.</p>
             
             <div className="space-y-3">
               <button 
-                onClick={() => onNavigate('add-course')}
-                className="w-full py-3 px-4 bg-emerald-600 text-white font-semibold rounded-xl hover:bg-emerald-700 transition text-left text-sm flex justify-between"
+                onClick={() => onNavigate('add-student')}
+                className="w-full py-3 px-4 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 transition text-left text-sm flex justify-between items-center shadow-sm"
               >
-                <span>Add New Course</span>
+                <span>Enroll New Student</span>
+                <span>➔</span>
+              </button>
+
+              <button 
+                onClick={() => onNavigate('add-blog')}
+                className="w-full py-3 px-4 bg-gray-950 text-white font-semibold rounded-xl hover:bg-black transition text-left text-sm flex justify-between items-center shadow-sm"
+              >
+                <span>Publish Blog Post</span>
                 <span>➔</span>
               </button>
               
-              <button className="w-full py-3 px-4 bg-gray-900 text-white font-semibold rounded-xl hover:bg-black transition text-left text-sm flex justify-between">
+              <button 
+                onClick={() => onNavigate('add-course')}
+                className="w-full py-3 px-4 bg-emerald-600 text-white font-semibold rounded-xl hover:bg-emerald-700 transition text-left text-sm flex justify-between items-center shadow-sm"
+              >
+                <span>Upload Course or Book</span>
+                <span>➔</span>
+              </button>
+              
+              <button 
+                onClick={() => alert('Exchange rate configuration module coming soon!')}
+                className="w-full py-3 px-4 bg-gray-50 text-gray-700 font-semibold rounded-xl hover:bg-gray-100 transition text-left text-sm flex justify-between items-center border border-gray-100"
+              >
                 <span>Manage Global Exchange Rates</span>
-                <span>➔</span>
-              </button>
-              
-              <button className="w-full py-3 px-4 bg-blue-50 text-blue-700 font-semibold rounded-xl hover:bg-blue-100 transition text-left text-sm flex justify-between">
-                <span>Configure Staff Access</span>
-                <span>➔</span>
-              </button>
-              
-              <button className="w-full py-3 px-4 bg-amber-50 text-amber-700 font-semibold rounded-xl hover:bg-amber-100 transition text-left text-sm flex justify-between">
-                <span>Verify M-Pesa Discrepancy</span>
                 <span>➔</span>
               </button>
             </div>
