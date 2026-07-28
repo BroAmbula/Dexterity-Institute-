@@ -20,10 +20,10 @@ import CourseCatalog from './Student/CourseCatalog';
 import PaymentPortal from './Student/PaymentPortal';
 
 // Admin Imports
-import SuperAdminPanel from './SuperAdmin/SuperAdminPanel';
+import AdminDashboard from './Admin/AdminDashboard';
 
 // Super Admin Imports
-import SuperAdminPanel from './Frontend/SuperAdmin/SuperAdminPanel';
+import SuperAdminPanel from './SuperAdmin/SuperAdminPanel';
 
 export default function App() {
   const [user, setUser] = useState(null);
