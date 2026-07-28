@@ -76,6 +76,10 @@ Route::middleware(['auth:sanctum', 'super-admin'])->prefix('super-admin')->group
     Route::post('/students', [SuperAdminDashboardController::class, 'storeStudent']);
     Route::post('/blogs', [BlogController::class, 'store']);
     Route::post('/products', [ProductController::class, 'store']);
+
+    // --- ENROLLMENT & APPLICATION APPROVAL ---
+    Route::get('/enrollments', [AdminEnrollmentController::class, 'index']);
+    Route::patch('/enrollments/{enrollment}/status', [AdminEnrollmentController::class, 'updateStatus']);
 });
 
 // Secure Download Route for Paid Users / Instructors
