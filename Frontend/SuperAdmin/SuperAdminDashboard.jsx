@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { getApiBaseUrl } from '../apiConfig';
 
 export default function SuperAdminDashboard({ onNavigate }) {
   const [metrics, setMetrics] = useState({
@@ -18,7 +19,7 @@ export default function SuperAdminDashboard({ onNavigate }) {
     const loadMetrics = async () => {
       try {
         const token = localStorage.getItem('token') || localStorage.getItem('auth_token');
-        const baseUrl = import.meta.env.VITE_API_BASE_URL || 'https://dexterity-institute-production.up.railway.app';
+        const baseUrl = getApiBaseUrl();
         
         const response = await fetch(`${baseUrl}/api/super-admin/dashboard/stats`, {
           method: 'GET',
