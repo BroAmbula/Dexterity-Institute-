@@ -23,7 +23,7 @@ class StudentDashboardController extends Controller
                     'id' => $enrollment->id,
                     'course_title' => $enrollment->course->title,
                     'school' => $enrollment->course->school,
-                    'application_status' => $enrollment->application_status,
+                    'application_status' => $enrollment->status,
                     'payment_status' => $enrollment->payment_status,
                     'fee_usd' => (float)$enrollment->course->fee_usd,
                     'exchange_rate' => (float)$enrollment->course->exchange_rate

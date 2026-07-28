@@ -8,6 +8,24 @@ use App\Models\Purchase;
 
 class ProductController extends Controller
 {
+    // Public listing for the main site's marketplace/books section
+    public function index()
+    {
+        $products = Product::latest()->get()->map(function ($product) {
+            return [
+                'id' => $product->id,
+                'title' => $product->title,
+                'type' => $product->type,
+                'price_kes' => (float) $product->price_kes,
+                'price_usd' => (float) $product->price_usd,
+                'description' => $product->description,
+                'created_at' => $product->created_at,
+            ];
+        });
+
+        return response()->json($products);
+    }
+
     public function store(Request $request)
     {
         $request->validate([

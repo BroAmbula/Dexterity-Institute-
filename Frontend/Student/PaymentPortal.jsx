@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Smartphone, CreditCard, Lock, ChevronLeft, ShieldCheck } from 'lucide-react';
+import { getApiBaseUrl } from '../apiConfig';
 
 export default function PaymentPortal({ onNavigate, course }) {
   // Check if user is logged in
@@ -8,6 +9,11 @@ export default function PaymentPortal({ onNavigate, course }) {
   const [currency, setCurrency] = useState('KES'); // Default to KES
   const [isProcessing, setIsProcessing] = useState(false);
   const [formData, setFormData] = useState({ phone: '', cardNumber: '', cvc: '' });
+  const [phoneError, setPhoneError] = useState('');
+  const [error, setError] = useState('');
+
+  // Kenyan M-Pesa format: exactly 10 digits, starting with 07 or 01
+  const isValidPhone = (phone) => /^0[17][0-9]{8}$/.test(phone);
 
   // 1. Guard Clause: Authentication Check
   if (!isLoggedIn) {
@@ -42,18 +48,55 @@ export default function PaymentPortal({ onNavigate, course }) {
 
   const amountKES = course.feeUSD * course.exchangeRate;
 
-  const handlePayment = (e) => {
+  const handlePayment = async (e) => {
     e.preventDefault();
+    setError('');
+    setPhoneError('');
+
+    if (currency === 'KES' && !isValidPhone(formData.phone)) {
+      setPhoneError('Enter a valid M-Pesa number: 10 digits starting with 07 or 01 (e.g. 0712345678).');
+      return;
+    }
+
+    const isLiveCourse = typeof course.id === 'string' && course.id.startsWith('live-');
+    if (!isLiveCourse) {
+      // Static/demo catalog entry with no real backend record yet
+      setTimeout(() => {
+        alert('This is a sample course preview. Real payment is only available for courses published by an admin.');
+        setIsProcessing(false);
+      }, 1200);
+      setIsProcessing(true);
+      return;
+    }
+
     setIsProcessing(true);
-    
-    // Simulate API calls
-    setTimeout(() => {
-      alert(currency === 'KES' 
-        ? 'M-Pesa STK Push sent successfully to your phone!' 
-        : 'PayPal/Card transaction authorized successfully!');
-      setIsProcessing(false);
+    try {
+      const token = localStorage.getItem('token') || localStorage.getItem('auth_token') || localStorage.getItem('dex_token');
+      const response = await fetch(`${getApiBaseUrl()}/api/student/pay-and-enroll`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          course_id: course.id.replace('live-', ''),
+          phone_number: formData.phone,
+        }),
+      });
+
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.message || 'Payment failed. Please try again.');
+      }
+
+      alert(data.message || 'Payment confirmed! You are now enrolled.');
       onNavigate('student-dashboard');
-    }, 2000);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   return (
@@ -94,6 +137,8 @@ export default function PaymentPortal({ onNavigate, course }) {
             </p>
           </div>
 
+          {error && <div className="bg-red-50 text-red-700 p-3 rounded-xl mb-4 text-xs font-bold">{error}</div>}
+
           {/* Conditional Forms */}
           <form onSubmit={handlePayment} className="space-y-4">
             {currency === 'KES' ? (
@@ -110,8 +155,16 @@ export default function PaymentPortal({ onNavigate, course }) {
                   type="tel" 
                   placeholder="07XX XXX XXX" 
                   required
-                  className="w-full p-4 border border-gray-200 rounded-xl font-bold text-gray-900"
+                  maxLength={10}
+                  value={formData.phone}
+                  onChange={(e) => {
+                    const digitsOnly = e.target.value.replace(/\D/g, '').slice(0, 10);
+                    setFormData({ ...formData, phone: digitsOnly });
+                    setPhoneError('');
+                  }}
+                  className={`w-full p-4 border rounded-xl font-bold text-gray-900 ${phoneError ? 'border-red-400' : 'border-gray-200'}`}
                 />
+                {phoneError && <p className="text-xs text-red-600 font-bold">{phoneError}</p>}
               </div>
             ) : (
               // Card/PayPal Form

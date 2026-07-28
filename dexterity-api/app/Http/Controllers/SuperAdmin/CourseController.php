@@ -8,6 +8,16 @@ use Illuminate\Http\Request;
 
 class CourseController extends Controller
 {
+    // Public listing for the main site's Courses page — only shows active courses
+    public function index()
+    {
+        $courses = Course::where('is_active', true)
+            ->select('id', 'title', 'school', 'description', 'duration', 'delivery_mode', 'eligibility', 'fee_usd', 'exchange_rate')
+            ->get();
+
+        return response()->json($courses);
+    }
+
     /**
      * Store a newly created course.
      */

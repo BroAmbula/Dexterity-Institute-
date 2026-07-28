@@ -8,6 +8,28 @@ use Illuminate\Support\Str;
 
 class BlogController extends Controller
 {
+    // Public listing for the main site's Publications page
+    public function index()
+    {
+        $blogs = Blog::with('user:id,name')
+            ->latest()
+            ->get()
+            ->map(function ($blog) {
+                return [
+                    'id' => $blog->id,
+                    'title' => $blog->title,
+                    'slug' => $blog->slug,
+                    'content' => $blog->content,
+                    'summary' => \Illuminate\Support\Str::limit(strip_tags($blog->content), 160),
+                    'image' => $blog->image ? asset('storage/' . $blog->image) : null,
+                    'author' => $blog->user->name ?? 'Dexterity Institute Team',
+                    'created_at' => $blog->created_at,
+                ];
+            });
+
+        return response()->json($blogs);
+    }
+
     public function store(Request $request)
     {
         $request->validate([

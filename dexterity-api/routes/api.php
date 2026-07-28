@@ -23,6 +23,11 @@ Route::post('/verify-email', [AuthController::class, 'verifyEmail']);
 Route::post('/resend-verification-code', [AuthController::class, 'resendVerificationCode']);
 Route::post('/login', [AuthController::class, 'login']);
 
+// Public content feeds for the main marketing site
+Route::get('/blogs', [BlogController::class, 'index']);
+Route::get('/products', [ProductController::class, 'index']);
+Route::get('/courses', [CourseController::class, 'index']);
+
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
 });

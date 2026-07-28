@@ -7,5 +7,22 @@ use Illuminate\Database\Eloquent\Model;
 
 class Enrollment extends Model
 {
-    protected $fillable = ['user_id', 'course_id', 'application_status', 'payment_status'];
+    use HasFactory;
+
+    protected $fillable = [
+        'user_id',
+        'course_id',
+        'status',
+        'payment_status',
+    ];
+
+    public function course()
+    {
+        return $this->belongsTo(Course::class);
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 }
