@@ -21,6 +21,13 @@ return Application::configure(basePath: dirname(__DIR__))
             'admin' => \App\Http\Middleware\EnsureUserIsAdmin::class,
             'super-admin' => \App\Http\Middleware\EnsureUserIsSuperAdmin::class,
         ]);
+
+        // Force every /api/* request to be treated as JSON-expecting so
+        // unauthenticated hits return a clean 401 instead of crashing
+        // with "Route [login] not defined" (this app has no web login route).
+        $middleware->redirectGuestsTo(function (Request $request) {
+            return $request->is('api/*') ? null : route('login');
+        });
     })
     ->withExceptions(function (Exceptions $exceptions) {
         $exceptions->shouldRenderJsonWhen(
