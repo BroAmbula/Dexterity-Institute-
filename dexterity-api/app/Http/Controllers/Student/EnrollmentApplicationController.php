@@ -44,12 +44,11 @@ class EnrollmentApplicationController extends Controller
         }
 
         $enrollment = Enrollment::create([
-            'id' => Str::uuid(),
-            'user_id' => $userId,
-            'course_id' => $request->course_id,
-            'application_status' => 'PENDING',
-            'payment_status' => 'UNPAID'
-        ]);
+    'user_id' => $userId,
+    'course_id' => $request->course_id,
+    'application_status' => 'PENDING',
+    'payment_status' => 'UNPAID'
+   ]);
 
         return response()->json([
             'message' => 'Application filed successfully. Your profile has been sent to admissions review.',

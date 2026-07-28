@@ -25,4 +25,13 @@ COPY . .
 
 RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache
 
-CMD php -S 0.0.0.0:$PORT -t public
+#!/bin/sh
+set -e
+php artisan migrate --force
+php artisan config:cache || true
+php artisan route:cache || true
+exec php -S 0.0.0.0:"$PORT" -t public
+
+RUN chmod +x entrypoint.sh
+CMD ["./entrypoint.sh"]
+

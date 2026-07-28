@@ -7,12 +7,5 @@ use Illuminate\Database\Eloquent\Model;
 
 class Enrollment extends Model
 {
-    use HasFactory;
-
-    protected $fillable = [
-        'user_id',
-        'course_id',
-        'status',
-        'payment_status',
-    ];
+    protected $fillable = ['user_id', 'course_id', 'application_status', 'payment_status'];
 }

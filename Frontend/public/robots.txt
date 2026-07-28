@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://dexterity-institute-1.onrender.com/sitemap.xml
