@@ -20,7 +20,7 @@ import CourseCatalog from './Student/CourseCatalog';
 import PaymentPortal from './Student/PaymentPortal';
 
 // Admin Imports
-import AdminDashboard from './Admin/AdminDashboard';
+import SuperAdminPanel from './SuperAdmin/SuperAdminPanel';
 
 // Super Admin Imports
 import SuperAdminPanel from './Frontend/SuperAdmin/SuperAdminPanel';

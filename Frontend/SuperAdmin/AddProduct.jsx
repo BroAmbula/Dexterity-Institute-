@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import API from '../../utils/axios';
+import API from '../axios';
 
 export default function AddProduct({ onBack }) {
   const [form, setForm] = useState({ title: '', description: '', type: 'book', price_kes: '', price_usd: '' });
