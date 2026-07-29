@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { getApiBaseUrl } from '../apiConfig';
 
 export default function AddStudent({ onBack }) {
   const [formData, setFormData] = useState({ name: '', email: '', password: '', phone: '' });
@@ -14,7 +15,7 @@ export default function AddStudent({ onBack }) {
 
     try {
       const token = localStorage.getItem('token') || localStorage.getItem('auth_token');
-      const baseUrl = import.meta.env.VITE_API_BASE_URL || 'https://dexterity-institute-production.up.railway.app';
+      const baseUrl = getApiBaseUrl();
 
       const response = await fetch(`${baseUrl}/api/super-admin/students`, {
         method: 'POST',
