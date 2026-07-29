@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import SuperAdminDashboard from './SuperAdminDashboard';
 import AddStudent from './AddStudent';
+import AddAdmin from './AddAdmin';
 import AddBlog from './AddBlog';
 import AddProduct from './AddProduct';
 
@@ -28,6 +29,13 @@ export default function SuperAdminPanel({ onLogout }) {
             className={`px-4 py-2 rounded-xl text-xs font-bold transition ${currentTab === 'add-student' ? 'bg-blue-600 text-white shadow-sm' : 'text-gray-600 hover:bg-gray-100'}`}
           >
             Enroll Student
+          </button>
+
+          <button 
+            onClick={() => setCurrentTab('add-admin')}
+            className={`px-4 py-2 rounded-xl text-xs font-bold transition ${currentTab === 'add-admin' ? 'bg-purple-600 text-white shadow-sm' : 'text-gray-600 hover:bg-gray-100'}`}
+          >
+            Add Admin
           </button>
 
           <button 
@@ -59,6 +67,7 @@ export default function SuperAdminPanel({ onLogout }) {
       <main className="flex-1">
         {currentTab === 'dashboard' && <SuperAdminDashboard onNavigate={setCurrentTab} />}
         {currentTab === 'add-student' && <AddStudent onBack={() => setCurrentTab('dashboard')} />}
+          {currentTab === 'add-admin' && <AddAdmin onBack={() => setCurrentTab('dashboard')} />}
         {currentTab === 'add-blog' && <AddBlog onBack={() => setCurrentTab('dashboard')} />}
         {currentTab === 'add-course' && <AddProduct onBack={() => setCurrentTab('dashboard')} />}
       </main>
