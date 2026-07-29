@@ -1,136 +1,96 @@
-import React, { useState, useEffect } from 'react';
-import { Calendar, User, ArrowRight, BookOpen, Download } from 'lucide-react';
-import { getApiBaseUrl } from './apiConfig';
+import React, { useState } from 'react';
+import API from '../axios';
 
-export default function BlogsPage() {
-  const [blogs, setBlogs] = useState([]);
-  const [products, setProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
+export default function AddBlog({ onBack }) {
+  const [title, setTitle] = useState('');
+  const [content, setContent] = useState('');
+  const [image, setImage] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState('');
+  const [error, setError] = useState('');
 
-  useEffect(() => {
-    const load = async () => {
-      try {
-        const base = getApiBaseUrl();
-        const [blogsRes, productsRes] = await Promise.all([
-          fetch(`${base}/api/blogs`),
-          fetch(`${base}/api/products`),
-        ]);
-        if (blogsRes.ok) setBlogs(await blogsRes.json());
-        if (productsRes.ok) setProducts(await productsRes.json());
-      } catch (err) {
-        console.error('Failed to load publications/products', err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    load();
-  }, []);
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
+    setSuccess('');
 
-  const featured = blogs[0];
-  const rest = blogs.slice(1);
+    const data = new FormData();
+    data.append('title', title);
+    data.append('content', content);
+    if (image) data.append('image', image);
+
+    try {
+      await API.post('/super-admin/blogs', data, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      setSuccess('Blog post published live successfully!');
+      setTitle('');
+      setContent('');
+      setImage(null);
+    } catch (err) {
+      setError(err.response?.data?.message || 'Error publishing blog post.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
-    <div className="min-h-screen bg-white py-16 px-6 sm:px-8">
-      <div className="max-w-7xl mx-auto">
-
-        {/* Header */}
-        <div className="max-w-2xl mb-16 space-y-4">
-          <span className="text-red-600 font-bold uppercase tracking-wider text-xs">Knowledge Base</span>
-          <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-900">Publications & Research Insights</h1>
-          <p className="text-slate-600">
-            Read critical perspectives on behavioral psychology, student placement methodologies, vocational alignment, and small business strategy from our leadership directors.
-          </p>
+    <div className="p-6 max-w-4xl mx-auto bg-white rounded-2xl shadow-sm border border-gray-100 my-6 text-gray-800">
+      <div className="flex justify-between items-center mb-6">
+        <div>
+          <h2 className="text-2xl font-extrabold text-gray-950">Publish System Blog Post</h2>
+          <p className="text-xs text-gray-400 mt-1">Broadcast announcements, tech guides, or institutional news.</p>
         </div>
-
-        {loading && <p className="text-slate-400 text-sm font-bold mb-8">Loading publications...</p>}
-
-        {/* Featured Big Blog - shows the most recent real post if one exists */}
-        {featured && (
-          <div className="bg-slate-50 border border-slate-200/80 rounded-3xl p-8 md:p-12 grid lg:grid-cols-12 gap-8 items-center mb-16">
-            <div className="lg:col-span-7 space-y-4">
-              <span className="text-xs font-bold text-blue-900 bg-blue-100/60 px-3 py-1.5 rounded-full inline-block">
-                Latest Feature
-              </span>
-              <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-950 leading-tight">
-                {featured.title}
-              </h2>
-              <p className="text-slate-600 leading-relaxed text-sm sm:text-base">
-                {featured.summary}
-              </p>
-              <div className="flex items-center gap-6 text-xs font-medium text-slate-500 pt-2">
-                <span className="flex items-center gap-1.5"><User size={14} /> {featured.author}</span>
-                <span className="flex items-center gap-1.5"><Calendar size={14} /> {new Date(featured.created_at).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}</span>
-              </div>
-            </div>
-            <div className="lg:col-span-5 h-[220px] bg-slate-900 rounded-2xl flex flex-col justify-center p-8 text-white relative overflow-hidden">
-              <div className="absolute inset-0 bg-blue-950/20 mix-blend-multiply" />
-              <BookOpen size={48} className="text-red-500 mb-4" />
-              <h4 className="font-extrabold">System Announcement</h4>
-              <p className="text-xs text-gray-300 mt-1">Published directly by the Dexterity Super Admin team.</p>
-            </div>
-          </div>
+        {onBack && (
+          <button onClick={onBack} className="text-xs font-bold text-blue-600 hover:underline">
+            ← Back to Command Center
+          </button>
         )}
-
-        {!loading && blogs.length === 0 && (
-          <div className="text-center py-16 text-slate-400 font-bold mb-16">No publications yet. Check back soon.</div>
-        )}
-
-        {/* Secondary Blog Grid */}
-        {rest.length > 0 && (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-20">
-            {rest.map((blog) => (
-              <div key={blog.id} className="flex flex-col justify-between border-b border-slate-200 pb-8 md:border-b-0 md:pb-0">
-                <div className="space-y-4">
-                  <span className="text-[10px] font-bold tracking-widest text-red-600 uppercase">
-                    Announcement
-                  </span>
-                  <h3 className="text-xl font-bold text-slate-950 leading-snug hover:text-blue-900 transition cursor-pointer">
-                    {blog.title}
-                  </h3>
-                  <p className="text-slate-600 text-sm leading-relaxed line-clamp-3">
-                    {blog.summary}
-                  </p>
-                </div>
-                <div className="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-slate-500">
-                  <span>By {blog.author}</span>
-                  <span className="text-slate-400">{new Date(blog.created_at).toLocaleDateString()}</span>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {/* Digital Books & Course Bundles */}
-        {products.length > 0 && (
-          <div>
-            <div className="max-w-2xl mb-10 space-y-2">
-              <span className="text-red-600 font-bold uppercase tracking-wider text-xs">Marketplace</span>
-              <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900">Digital Books & Course Bundles</h2>
-              <p className="text-slate-600 text-sm">Downloadable resources available for purchase.</p>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              {products.map((product) => (
-                <div key={product.id} className="border border-slate-200 rounded-2xl p-6 flex flex-col justify-between">
-                  <div className="space-y-3">
-                    <span className="text-[10px] font-bold tracking-widest text-emerald-600 uppercase">
-                      {product.type === 'book' ? 'Book' : 'Course Bundle'}
-                    </span>
-                    <h3 className="text-lg font-bold text-slate-950">{product.title}</h3>
-                    <p className="text-slate-600 text-sm line-clamp-3">{product.description}</p>
-                  </div>
-                  <div className="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between">
-                    <span className="font-black text-slate-900">KSh {Number(product.price_kes).toLocaleString()}</span>
-                    <span className="text-xs text-emerald-700 font-bold flex items-center gap-1">
-                      <Download size={12} /> ${product.price_usd}
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
       </div>
+
+      {success && <div className="bg-emerald-50 text-emerald-700 p-3.5 rounded-xl mb-6 text-xs font-bold">✅ {success}</div>}
+      {error && <div className="bg-red-50 text-red-700 p-3.5 rounded-xl mb-6 text-xs font-bold">⚠️ {error}</div>}
+
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div>
+          <label className="text-xs font-bold text-gray-400 uppercase block mb-1">Blog Title</label>
+          <input 
+            type="text" 
+            placeholder="Future of TVET Education in Kenya..."
+            value={title} 
+            onChange={e => setTitle(e.target.value)} 
+            className="w-full border border-gray-200 p-3 rounded-xl text-sm focus:outline-blue-600 font-semibold" 
+            required 
+          />
+        </div>
+        <div>
+          <label className="text-xs font-bold text-gray-400 uppercase block mb-1">Featured Cover Image</label>
+          <input 
+            type="file" 
+            onChange={e => setImage(e.target.files[0])} 
+            className="w-full border border-gray-200 p-2 rounded-xl text-sm bg-gray-50" 
+          />
+        </div>
+        <div>
+          <label className="text-xs font-bold text-gray-400 uppercase block mb-1">Content Body</label>
+          <textarea 
+            rows="8" 
+            placeholder="Write your article or curriculum breakdown here..."
+            value={content} 
+            onChange={e => setContent(e.target.value)} 
+            className="w-full border border-gray-200 p-3 rounded-xl text-sm focus:outline-blue-600 font-semibold" 
+            required 
+          />
+        </div>
+        <button 
+          type="submit" 
+          disabled={loading} 
+          className="bg-gray-950 hover:bg-black text-white px-6 py-3.5 rounded-xl font-bold text-sm transition shadow-md"
+        >
+          {loading ? 'Publishing...' : 'Publish Post Live ➔'}
+        </button>
+      </form>
     </div>
   );
 }
