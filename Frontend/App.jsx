@@ -243,6 +243,16 @@ export default function App() {
                 {l.label}
               </button>
             ))}
+            {!userRole && (
+              <>
+                <button onClick={() => handleNavigation('student-login')} className="text-left py-2 text-sm font-bold border-b border-slate-50 text-slate-800">
+                  Student Login
+                </button>
+                <button onClick={() => handleNavigation('super-admin-login')} className="text-left py-2 text-sm font-bold border-b border-slate-50 text-slate-800">
+                  Admin Login
+                </button>
+              </>
+            )}
             {userRole && (
               <button onClick={handleLogout} className="text-left py-2 text-sm font-bold text-red-600 mt-2">
                 Logout
