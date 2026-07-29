@@ -53,4 +53,13 @@ class BlogController extends Controller
 
         return response()->json(['message' => 'Blog post published live!', 'blog' => $blog], 201);
     }
+    public function destroy(Blog $blog)
+    {
+        if ($blog->image) {
+            \Illuminate\Support\Facades\Storage::disk('public')->delete($blog->image);
+        }
+        $blog->delete();
+
+        return response()->json(['message' => 'Blog post deleted successfully.']);
+    }
 }

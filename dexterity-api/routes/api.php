@@ -80,8 +80,9 @@ Route::middleware(['auth:sanctum', 'super-admin'])->prefix('super-admin')->group
     // --- SUPER ADMIN CAPABILITIES ---
     Route::post('/students', [SuperAdminDashboardController::class, 'storeStudent']);
     Route::post('/blogs', [BlogController::class, 'store']);
+    Route::delete('/blogs/{blog}', [BlogController::class, 'destroy']);
     Route::post('/products', [ProductController::class, 'store']);
-
+    Route::delete('/products/{product}', [ProductController::class, 'destroy']);
     // --- ENROLLMENT & APPLICATION APPROVAL ---
     Route::get('/enrollments', [AdminEnrollmentController::class, 'index']);
     Route::patch('/enrollments/{enrollment}/status', [AdminEnrollmentController::class, 'updateStatus']);

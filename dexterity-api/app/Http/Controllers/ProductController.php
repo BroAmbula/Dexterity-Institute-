@@ -69,4 +69,13 @@ class ProductController extends Controller
 
         return response()->download($path);
     }
+    public function destroy(Product $product)
+    {
+        if ($product->file_path) {
+            \Illuminate\Support\Facades\Storage::disk('public')->delete($product->file_path);
+        }
+        $product->delete();
+
+        return response()->json(['message' => 'Product deleted successfully.']);
+    }
 }
