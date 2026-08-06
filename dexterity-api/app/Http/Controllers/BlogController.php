@@ -53,6 +53,30 @@ class BlogController extends Controller
 
         return response()->json(['message' => 'Blog post published live!', 'blog' => $blog], 201);
     }
+
+    public function update(Request $request, Blog $blog)
+    {
+        $request->validate([
+            'title' => 'required|string|max:255',
+            'content' => 'required|string',
+            'image' => 'nullable|image|max:2048',
+        ]);
+
+        if ($request->hasFile('image')) {
+            if ($blog->image) {
+                \Illuminate\Support\Facades\Storage::disk('public')->delete($blog->image);
+            }
+            $blog->image = $request->file('image')->store('blogs', 'public');
+        }
+
+        $blog->title = $request->title;
+        $blog->content = $request->content;
+        $blog->slug = Str::slug($request->title) . '-' . uniqid();
+        $blog->save();
+
+        return response()->json(['message' => 'Blog post updated successfully.', 'blog' => $blog]);
+    }
+
     public function destroy(Blog $blog)
     {
         if ($blog->image) {

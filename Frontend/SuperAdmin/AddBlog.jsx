@@ -6,6 +6,7 @@ export default function AddBlog({ onBack }) {
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [image, setImage] = useState(null);
+  const [editingBlog, setEditingBlog] = useState(null);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState('');
   const [error, setError] = useState('');
@@ -42,16 +43,24 @@ export default function AddBlog({ onBack }) {
     if (image) data.append('image', image);
 
     try {
-      await API.post('/super-admin/blogs', data, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-      });
-      setSuccess('Blog post published live successfully!');
+      if (editingBlog) {
+        await API.patch(`/super-admin/blogs/${editingBlog.id}`, data, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        });
+        setSuccess('Blog post updated successfully!');
+      } else {
+        await API.post('/super-admin/blogs', data, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        });
+        setSuccess('Blog post published live successfully!');
+      }
       setTitle('');
       setContent('');
       setImage(null);
+      setEditingBlog(null);
       loadBlogs();
     } catch (err) {
-      setError(err.response?.data?.message || 'Error publishing blog post.');
+      setError(err.response?.data?.message || 'Error saving blog post.');
     } finally {
       setLoading(false);
     }
@@ -70,19 +79,48 @@ export default function AddBlog({ onBack }) {
     }
   };
 
+  const handleEdit = (blog) => {
+    setTitle(blog.title);
+    setContent(blog.content);
+    setImage(null);
+    setEditingBlog(blog);
+    setSuccess('');
+    setError('');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleCancelEdit = () => {
+    setTitle('');
+    setContent('');
+    setImage(null);
+    setEditingBlog(null);
+    setSuccess('');
+    setError('');
+  };
+
   return (
     <div className="p-6 max-w-4xl mx-auto space-y-6 my-6">
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 text-gray-800">
-        <div className="flex justify-between items-center mb-6">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
           <div>
-            <h2 className="text-2xl font-extrabold text-gray-950">Publish System Blog Post</h2>
+            <h2 className="text-2xl font-extrabold text-gray-950">{editingBlog ? 'Update System Blog Post' : 'Publish System Blog Post'}</h2>
             <p className="text-xs text-gray-400 mt-1">Broadcast announcements, tech guides, or institutional news.</p>
+            {editingBlog && (
+              <p className="mt-2 text-xs text-slate-500">Editing "{editingBlog.title}" — upload a new image only if you want to replace the existing cover.</p>
+            )}
           </div>
-          {onBack && (
-            <button onClick={onBack} className="text-xs font-bold text-blue-600 hover:underline">
-              ← Back to Command Center
-            </button>
-          )}
+          <div className="flex gap-3">
+            {editingBlog && (
+              <button type="button" onClick={handleCancelEdit} className="text-xs font-bold text-slate-600 hover:text-slate-900">
+                Cancel edit
+              </button>
+            )}
+            {onBack && (
+              <button onClick={onBack} className="text-xs font-bold text-blue-600 hover:underline">
+                ← Back to Command Center
+              </button>
+            )}
+          </div>
         </div>
 
         {success && <div className="bg-emerald-50 text-emerald-700 p-3.5 rounded-xl mb-6 text-xs font-bold">✅ {success}</div>}
@@ -124,7 +162,7 @@ export default function AddBlog({ onBack }) {
             disabled={loading} 
             className="bg-gray-950 hover:bg-black text-white px-6 py-3.5 rounded-xl font-bold text-sm transition shadow-md"
           >
-            {loading ? 'Publishing...' : 'Publish Post Live ➔'}
+            {loading ? (editingBlog ? 'Updating...' : 'Publishing...') : (editingBlog ? 'Save Changes' : 'Publish Post Live ➔')}
           </button>
         </form>
       </div>
@@ -143,13 +181,21 @@ export default function AddBlog({ onBack }) {
                 <p className="font-bold text-sm text-gray-900">{blog.title}</p>
                 <p className="text-xs text-gray-400 mt-0.5">By {blog.author} • {new Date(blog.created_at).toLocaleDateString()}</p>
               </div>
-              <button
-                onClick={() => handleDelete(blog.id)}
-                disabled={deletingId === blog.id}
-                className="text-xs font-bold text-red-600 hover:text-red-700 border border-red-200 hover:bg-red-50 px-3 py-2 rounded-lg transition disabled:opacity-50"
-              >
-                {deletingId === blog.id ? 'Deleting...' : 'Delete'}
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => handleEdit(blog)}
+                  className="text-xs font-bold text-blue-600 hover:text-blue-700 border border-blue-200 hover:bg-blue-50 px-3 py-2 rounded-lg transition"
+                >
+                  Edit
+                </button>
+                <button
+                  onClick={() => handleDelete(blog.id)}
+                  disabled={deletingId === blog.id}
+                  className="text-xs font-bold text-red-600 hover:text-red-700 border border-red-200 hover:bg-red-50 px-3 py-2 rounded-lg transition disabled:opacity-50"
+                >
+                  {deletingId === blog.id ? 'Deleting...' : 'Delete'}
+                </button>
+              </div>
             </div>
           ))}
         </div>

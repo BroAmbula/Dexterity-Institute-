@@ -4,6 +4,7 @@ import { getApiBaseUrl } from '../apiConfig';
 
 export default function AddProduct({ onBack }) {
   const [form, setForm] = useState({ title: '', description: '', type: 'book', price_kes: '', price_usd: '' });
+  const [isFree, setIsFree] = useState(false);
   const [file, setFile] = useState(null);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState('');
@@ -37,6 +38,10 @@ export default function AddProduct({ onBack }) {
 
     const data = new FormData();
     Object.keys(form).forEach(key => data.append(key, form[key]));
+    if (isFree) {
+      data.set('price_kes', '0');
+      data.set('price_usd', '0');
+    }
     if (file) data.append('file', file);
 
     try {
@@ -87,16 +92,17 @@ export default function AddProduct({ onBack }) {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="text-xs font-bold text-gray-400 uppercase block mb-1">Product Type</label>
-              <select 
-                value={form.type} 
-                onChange={e => setForm({...form, type: e.target.value})} 
-                className="w-full border border-gray-200 p-3 rounded-xl text-sm bg-white font-semibold"
-              >
-                <option value="book">Book (Downloadable eBook)</option>
-                <option value="course">Course Bundle (For Instructors to Teach)</option>
-              </select>
+            <div className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4">
+              <input
+                id="freeBook"
+                type="checkbox"
+                checked={isFree}
+                onChange={() => setIsFree(prev => !prev)}
+                className="h-4 w-4 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500"
+              />
+              <label htmlFor="freeBook" className="text-sm font-bold text-gray-700">
+                Publish as a free book
+              </label>
             </div>
             <div>
               <label className="text-xs font-bold text-gray-400 uppercase block mb-1">Product Title</label>
@@ -117,10 +123,11 @@ export default function AddProduct({ onBack }) {
               <input 
                 type="number" 
                 placeholder="1500"
-                value={form.price_kes} 
+                value={isFree ? '0' : form.price_kes} 
                 onChange={e => setForm({...form, price_kes: e.target.value})} 
                 className="w-full border border-gray-200 p-3 rounded-xl text-sm font-semibold" 
                 required 
+                disabled={isFree}
               />
             </div>
             <div>
@@ -128,10 +135,11 @@ export default function AddProduct({ onBack }) {
               <input 
                 type="number" 
                 placeholder="15.00"
-                value={form.price_usd} 
+                value={isFree ? '0' : form.price_usd} 
                 onChange={e => setForm({...form, price_usd: e.target.value})} 
                 className="w-full border border-gray-200 p-3 rounded-xl text-sm font-semibold" 
                 required 
+                disabled={isFree}
               />
             </div>
           </div>

@@ -12,6 +12,7 @@ use App\Http\Controllers\SuperAdmin\SystemCurriculumController;
 use App\Http\Controllers\SuperAdmin\CourseController;
 use App\Http\Controllers\BlogController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\FreeDownloadController;
 use App\Http\Controllers\Payment\PaymentController;
 use Illuminate\Support\Facades\Route;
 
@@ -27,6 +28,8 @@ Route::post('/login', [AuthController::class, 'login']);
 Route::get('/blogs', [BlogController::class, 'index']);
 Route::get('/products', [ProductController::class, 'index']);
 Route::get('/courses', [CourseController::class, 'index']);
+Route::get('/free-downloads', [FreeDownloadController::class, 'index']);
+Route::post('/free-downloads/send', [FreeDownloadController::class, 'send']);
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
@@ -80,6 +83,7 @@ Route::middleware(['auth:sanctum', 'super-admin'])->prefix('super-admin')->group
     // --- SUPER ADMIN CAPABILITIES ---
     Route::post('/students', [SuperAdminDashboardController::class, 'storeStudent']);
     Route::post('/blogs', [BlogController::class, 'store']);
+    Route::patch('/blogs/{blog}', [BlogController::class, 'update']);
     Route::delete('/blogs/{blog}', [BlogController::class, 'destroy']);
     Route::post('/products', [ProductController::class, 'store']);
     Route::delete('/products/{product}', [ProductController::class, 'destroy']);

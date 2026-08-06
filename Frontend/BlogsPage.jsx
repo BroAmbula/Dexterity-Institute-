@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Calendar, User, ArrowRight, BookOpen, Download } from 'lucide-react';
 import { getApiBaseUrl } from './apiConfig';
 
-export default function BlogsPage() {
+export default function BlogsPage({ onNavigate }) {
   const [blogs, setBlogs] = useState([]);
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -61,12 +61,26 @@ export default function BlogsPage() {
                 <span className="flex items-center gap-1.5"><User size={14} /> {featured.author}</span>
                 <span className="flex items-center gap-1.5"><Calendar size={14} /> {new Date(featured.created_at).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}</span>
               </div>
+              <button
+                type="button"
+                onClick={() => onNavigate('blog-detail', featured)}
+                className="mt-6 inline-flex items-center rounded-full bg-blue-600 px-5 py-3 text-sm font-bold text-white hover:bg-blue-700 transition"
+              >
+                Read featured article
+              </button>
             </div>
-            <div className="lg:col-span-5 h-[220px] bg-slate-900 rounded-2xl flex flex-col justify-center p-8 text-white relative overflow-hidden">
-              <div className="absolute inset-0 bg-blue-950/20 mix-blend-multiply" />
-              <BookOpen size={48} className="text-red-500 mb-4" />
-              <h4 className="font-extrabold">System Announcement</h4>
-              <p className="text-xs text-gray-300 mt-1">Published directly by the Dexterity Super Admin team.</p>
+            <div className="lg:col-span-5 overflow-hidden rounded-3xl border border-slate-200 bg-slate-900 min-h-[260px]">
+              {featured.image ? (
+                <img src={featured.image} alt={featured.title} className="h-full w-full object-cover" />
+              ) : (
+                <div className="flex h-full items-center justify-center p-8">
+                  <div className="text-center">
+                    <BookOpen size={48} className="text-red-500 mb-4" />
+                    <h4 className="font-extrabold text-white">System Announcement</h4>
+                    <p className="text-xs text-gray-300 mt-1">Published directly by the Dexterity Super Admin team.</p>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         )}
@@ -79,22 +93,32 @@ export default function BlogsPage() {
         {rest.length > 0 && (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-20">
             {rest.map((blog) => (
-              <div key={blog.id} className="flex flex-col justify-between border-b border-slate-200 pb-8 md:border-b-0 md:pb-0">
+              <div key={blog.id} className="flex flex-col justify-between rounded-3xl border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5">
+                {blog.image && (
+                  <img src={blog.image} alt={blog.title} className="mb-5 h-48 w-full rounded-3xl object-cover" />
+                )}
                 <div className="space-y-4">
                   <span className="text-[10px] font-bold tracking-widest text-red-600 uppercase">
                     Announcement
                   </span>
-                  <h3 className="text-xl font-bold text-slate-950 leading-snug hover:text-blue-900 transition cursor-pointer">
+                  <h3 className="text-xl font-bold text-slate-950 leading-snug">
                     {blog.title}
                   </h3>
                   <p className="text-slate-600 text-sm leading-relaxed line-clamp-3">
                     {blog.summary}
                   </p>
                 </div>
-                <div className="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-slate-500">
+                <div className="mt-6 flex items-center justify-between gap-4 border-t border-slate-100 pt-4 text-xs font-semibold text-slate-500">
                   <span>By {blog.author}</span>
                   <span className="text-slate-400">{new Date(blog.created_at).toLocaleDateString()}</span>
                 </div>
+                <button
+                  type="button"
+                  onClick={() => onNavigate('blog-detail', blog)}
+                  className="mt-4 inline-flex items-center justify-center rounded-full bg-blue-600 px-4 py-2 text-sm font-bold text-white hover:bg-blue-700 transition"
+                >
+                  Read article
+                </button>
               </div>
             ))}
           </div>

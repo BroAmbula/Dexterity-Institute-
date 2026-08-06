@@ -7,10 +7,12 @@ import LandingPage from './LandingPage';
 import AboutPage from './AboutPage';
 import CoursePage from './CoursePage';
 import BlogsPage from './BlogsPage';
+import BlogDetailPage from './BlogDetailPage';
 import EventsPage from './EventsPage';
 import PartnerWithUs from './PartnerWithUs';
 import ContactPage from './ContactPage';
 import FAQPage from './FAQPage';
+import FreeDownloadsPage from './FreeDownloadsPage';
 import Register from './Register';
 import { StudentLogin, AdminLogin, SuperAdminLogin } from './AuthPages';
 
@@ -18,6 +20,7 @@ import { StudentLogin, AdminLogin, SuperAdminLogin } from './AuthPages';
 import StudentDashboard from './Student/StudentDashboard';
 import CourseCatalog from './Student/CourseCatalog';
 import PaymentPortal from './Student/PaymentPortal';
+import LessonViewer from './Student/LessonViewer';
 
 // Admin Imports
 import AdminDashboard from './Admin/AdminDashboard';
@@ -32,6 +35,7 @@ export default function App() {
   const [userRole, setUserRole] = useState(() => localStorage.getItem('user_role') || null);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [selectedCourse, setSelectedCourse] = useState(null);
+  const [selectedBlog, setSelectedBlog] = useState(null);
   const [enrolledCourses, setEnrolledCourses] = useState([]);
 
   useEffect(() => {
@@ -99,7 +103,12 @@ export default function App() {
   };
 
   const handleNavigation = (viewId, data = null) => {
-    if (data) setSelectedCourse(data);
+    if (viewId === 'blog-detail') {
+      setSelectedBlog(data);
+    } else {
+      setSelectedBlog(null);
+      if (data) setSelectedCourse(data);
+    }
     localStorage.setItem('currentView', viewId);
     setCurrentView(viewId);
     setMobileOpen(false);
@@ -123,6 +132,7 @@ export default function App() {
   const publicLinks = [
     { label: 'Home', id: 'home' }, { label: 'About Us', id: 'about' },
     { label: 'Courses', id: 'courses' }, { label: 'Publications', id: 'blogs' },
+    { label: 'Free Downloads', id: 'free-downloads' },
     { label: 'Events', id: 'events' }, { label: 'Partner', id: 'partner' },
     { label: 'Contact', id: 'contact' }, { label: 'FAQs', id: 'faq' }
   ];
@@ -160,16 +170,19 @@ export default function App() {
       case 'about': return <AboutPage onNavigate={handleNavigation} />;
       case 'courses': return <CoursePage onNavigate={handleNavigation} />;
       case 'blogs': return <BlogsPage onNavigate={handleNavigation} />;
+      case 'blog-detail': return <BlogDetailPage onNavigate={handleNavigation} blog={selectedBlog} />;
       case 'events': return <EventsPage onNavigate={handleNavigation} />;
       case 'partner': return <PartnerWithUs onNavigate={handleNavigation} />;
       case 'contact': return <ContactPage onNavigate={handleNavigation} />;
       case 'faq': return <FAQPage onNavigate={handleNavigation} />;
+      case 'free-downloads': return <FreeDownloadsPage />;
       case 'register': return <Register onNavigate={handleNavigation} onRegisterSuccess={() => handleNavigation('student-login')} />;
       
       // Student Views
       case 'student-dashboard': return <StudentDashboard onNavigate={handleNavigation} enrolledCourses={enrolledCourses} />;
       case 'student-courses': return <CourseCatalog onNavigate={handleNavigation} />;
       case 'student-payments': return <PaymentPortal onNavigate={handleNavigation} course={selectedCourse} />;
+      case 'student-lessons': return <LessonViewer onNavigate={handleNavigation} course={selectedCourse} />;
       case 'student-login': return <StudentLogin onNavigate={handleNavigation} onLogin={(role, data) => handleLogin(role, data)} />;
       
       // Admin Views

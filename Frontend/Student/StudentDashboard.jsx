@@ -59,7 +59,7 @@ export default function StudentDashboard({ onNavigate, enrolledCourses = [] }) {
                 <p className="text-xs font-bold text-gray-500">{course.progress || 0}% Complete</p>
                 
                 <button 
-                  onClick={() => onNavigate('student-payments', course)}
+                  onClick={() => onNavigate('student-lessons', course)}
                   className="mt-4 w-full bg-gray-900 text-white font-bold py-2 rounded-lg text-sm hover:bg-black transition"
                 >
                   Continue Learning
