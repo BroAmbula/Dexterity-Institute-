@@ -11,7 +11,7 @@ export default function CourseCatalog() {
   useEffect(() => {
     const fetchActiveCourses = async () => {
       try {
-        const token = localStorage.getItem('dex_token');
+        const token = localStorage.getItem('token') || localStorage.getItem('auth_token') || localStorage.getItem('dex_token');
         const apiBaseUrl = getApiBaseUrl();
         const response = await fetch(`${apiBaseUrl}/api/student/active-courses`, {
           method: 'GET',

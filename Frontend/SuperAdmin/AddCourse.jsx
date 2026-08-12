@@ -1,5 +1,6 @@
 ﻿import React, { useState, useEffect } from 'react';
 import API from '../axios';
+import { getApiBaseUrl } from '../apiConfig';
 
 export default function AddCourse({ onBack }) {
   const [form, setForm] = useState({
@@ -22,9 +23,12 @@ export default function AddCourse({ onBack }) {
   const loadCourses = async () => {
     setLoadingCourses(true);
     try {
-      const response = await fetch('/api/courses');
+      const response = await fetch(`${getApiBaseUrl()}/api/courses`);
       if (response.ok) {
         setCourses(await response.json());
+      } else {
+        const data = await response.json();
+        console.error('Failed to load courses', data);
       }
     } catch (err) {
       console.error('Failed to load courses', err);
