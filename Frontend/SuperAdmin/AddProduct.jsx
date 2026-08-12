@@ -77,8 +77,8 @@ export default function AddProduct({ onBack }) {
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 text-gray-800">
         <div className="flex justify-between items-center mb-6">
           <div>
-            <h2 className="text-2xl font-extrabold text-gray-950">Upload Digital Book or Course Bundle</h2>
-            <p className="text-xs text-gray-400 mt-1">Sell downloadable textbooks or full course packages for instructors to teach.</p>
+            <h2 className="text-2xl font-extrabold text-gray-950">Upload Free or Paid Book / Course Bundle</h2>
+            <p className="text-xs text-gray-400 mt-1">Super admin can publish both free books and paid digital resources, including course bundles and downloadable textbooks.</p>
           </div>
           {onBack && (
             <button onClick={onBack} className="text-xs font-bold text-blue-600 hover:underline">

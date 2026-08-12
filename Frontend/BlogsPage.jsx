@@ -94,8 +94,12 @@ export default function BlogsPage({ onNavigate }) {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-20">
             {rest.map((blog) => (
               <div key={blog.id} className="flex flex-col justify-between rounded-3xl border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5">
-                {blog.image && (
+                {blog.image ? (
                   <img src={blog.image} alt={blog.title} className="mb-5 h-48 w-full rounded-3xl object-cover" />
+                ) : (
+                  <div className="mb-5 h-48 w-full rounded-3xl bg-slate-900 flex items-center justify-center">
+                    <BookOpen size={40} className="text-slate-200" />
+                  </div>
                 )}
                 <div className="space-y-4">
                   <span className="text-[10px] font-bold tracking-widest text-red-600 uppercase">
@@ -117,7 +121,7 @@ export default function BlogsPage({ onNavigate }) {
                   onClick={() => onNavigate('blog-detail', blog)}
                   className="mt-4 inline-flex items-center justify-center rounded-full bg-blue-600 px-4 py-2 text-sm font-bold text-white hover:bg-blue-700 transition"
                 >
-                  Read article
+                  Read more
                 </button>
               </div>
             ))}
