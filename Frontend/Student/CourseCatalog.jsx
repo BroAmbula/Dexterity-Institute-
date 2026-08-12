@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { getApiBaseUrl } from '../apiConfig';
 
-export default function CourseCatalog() {
+export default function CourseCatalog({ onNavigate }) {
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [submittingId, setSubmittingId] = useState(null);
 
   // Pull live active courses from Laravel database
   useEffect(() => {
@@ -39,38 +38,9 @@ export default function CourseCatalog() {
     fetchActiveCourses();
   }, []);
 
-  // Submit application to Supabase
-  const handleApply = async (courseId) => {
-    setSubmittingId(courseId);
+  const handleApply = (course) => {
     setError('');
-
-    try {
-      const token = localStorage.getItem('dex_token');
-      const apiBaseUrl = getApiBaseUrl();
-      const response = await fetch(`${apiBaseUrl}/api/student/apply`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({ course_id: courseId })
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Could not submit enrollment.');
-      }
-
-      alert('Success! Your application has been logged and sent for Admin review.');
-      window.location.href = '/student/dashboard'; // Route back to see the pending status
-
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setSubmittingId(null);
-    }
+    onNavigate('student-payments', course);
   };
 
   if (loading) {
@@ -132,11 +102,10 @@ export default function CourseCatalog() {
                   </div>
 
                   <button 
-                    onClick={() => handleApply(course.id)}
-                    disabled={submittingId !== null}
-                    className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold p-3 rounded-xl text-sm transition disabled:bg-gray-200 disabled:text-gray-400"
+                    onClick={() => handleApply(course)}
+                    className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold p-3 rounded-xl text-sm transition"
                   >
-                    {submittingId === course.id ? 'Filing Application...' : 'Apply for Enrollment'}
+                    Proceed to Payment
                   </button>
                 </div>
               </div>

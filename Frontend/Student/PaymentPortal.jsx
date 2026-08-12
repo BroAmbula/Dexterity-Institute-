@@ -46,7 +46,9 @@ export default function PaymentPortal({ onNavigate, course }) {
     );
   }
 
-  const amountKES = course.feeUSD * course.exchangeRate;
+  const feeUSD = course?.feeUSD ?? course?.fee_usd ?? 0;
+  const exchangeRate = course?.exchangeRate ?? course?.exchange_rate ?? 130;
+  const amountKES = feeUSD * exchangeRate;
 
   const handlePayment = async (e) => {
     e.preventDefault();
@@ -58,14 +60,13 @@ export default function PaymentPortal({ onNavigate, course }) {
       return;
     }
 
-    const isLiveCourse = typeof course.id === 'string' && course.id.startsWith('live-');
-    if (!isLiveCourse) {
-      // Static/demo catalog entry with no real backend record yet
+    const isPreviewCourse = typeof course.id === 'string' && course.id.startsWith('live-');
+    if (isPreviewCourse) {
+      setIsProcessing(true);
       setTimeout(() => {
         alert('This is a sample course preview. Real payment is only available for courses published by an admin.');
         setIsProcessing(false);
       }, 1200);
-      setIsProcessing(true);
       return;
     }
 
@@ -80,7 +81,7 @@ export default function PaymentPortal({ onNavigate, course }) {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          course_id: course.id.replace('live-', ''),
+          course_id: typeof course.id === 'string' ? course.id.replace('live-', '') : course.id,
           phone_number: formData.phone,
         }),
       });

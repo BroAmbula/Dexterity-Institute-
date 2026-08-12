@@ -40,6 +40,29 @@ export default function App() {
   const [selectedBlog, setSelectedBlog] = useState(null);
   const [enrolledCourses, setEnrolledCourses] = useState([]);
 
+  const fetchTracks = async () => {
+    if (userRole !== 'student') {
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem('token') || localStorage.getItem('auth_token') || localStorage.getItem('dex_token');
+      const response = await fetch(`${getApiBaseUrl()}/api/student/my-tracks`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Accept': 'application/json',
+        },
+      });
+
+      const data = await response.json();
+      if (response.ok) {
+        setEnrolledCourses(data);
+      }
+    } catch (err) {
+      console.error('Error fetching tracks', err);
+    }
+  };
+
   useEffect(() => {
     const storedUser = localStorage.getItem('user');
     const token = localStorage.getItem('token') || localStorage.getItem('auth_token');
@@ -68,18 +91,6 @@ export default function App() {
   // Fetch student tracks if user is student
   useEffect(() => {
     if (userRole === 'student') {
-      const fetchTracks = async () => {
-        try {
-          const token = localStorage.getItem('token') || localStorage.getItem('auth_token');
-          const response = await fetch(`${getApiBaseUrl()}/api/student/my-tracks`, {
-            headers: { 'Authorization': `Bearer ${token}` }
-          });
-          const data = await response.json();
-          if (response.ok) setEnrolledCourses(data);
-        } catch (err) { 
-          console.error("Error fetching tracks", err); 
-        }
-      };
       fetchTracks();
     }
   }, [userRole]);
@@ -118,6 +129,11 @@ export default function App() {
       setSelectedProduct(null);
       if (data) setSelectedCourse(data);
     }
+
+    if (viewId === 'student-dashboard' && userRole === 'student') {
+      fetchTracks();
+    }
+
     localStorage.setItem('currentView', viewId);
     setCurrentView(viewId);
     setMobileOpen(false);
