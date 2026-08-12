@@ -146,13 +146,26 @@ export default function BlogsPage({ onNavigate }) {
                     <h3 className="text-lg font-bold text-slate-950">{product.title}</h3>
                     <p className="text-slate-600 text-sm line-clamp-3">{product.description}</p>
                   </div>
-                  <div className="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between">
+                  <div className="mt-6 pt-4 border-t border-slate-100">
+                  <div className="flex items-center justify-between mb-4">
                     <span className="font-black text-slate-900">KSh {Number(product.price_kes).toLocaleString()}</span>
                     <span className="text-xs text-emerald-700 font-bold flex items-center gap-1">
                       <Download size={12} /> ${product.price_usd}
                     </span>
                   </div>
+                  <button
+                    type="button"
+                    onClick={() => onNavigate('product-checkout', product)}
+                    className={`w-full rounded-2xl px-4 py-3 text-sm font-bold transition ${
+                      product.price_kes === 0 && product.price_usd === 0
+                        ? 'bg-emerald-600 text-white hover:bg-emerald-700'
+                        : 'bg-blue-900 text-white hover:bg-blue-800'
+                    }`}
+                  >
+                    {product.price_kes === 0 && product.price_usd === 0 ? 'Download Free Book' : 'Buy Now'}
+                  </button>
                 </div>
+              </div>
               ))}
             </div>
           </div>

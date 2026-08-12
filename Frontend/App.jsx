@@ -21,6 +21,7 @@ import StudentDashboard from './Student/StudentDashboard';
 import CourseCatalog from './Student/CourseCatalog';
 import PaymentPortal from './Student/PaymentPortal';
 import LessonViewer from './Student/LessonViewer';
+import ProductCheckout from './ProductCheckout';
 
 // Admin Imports
 import AdminDashboard from './Admin/AdminDashboard';
@@ -35,6 +36,7 @@ export default function App() {
   const [userRole, setUserRole] = useState(() => localStorage.getItem('user_role') || null);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [selectedCourse, setSelectedCourse] = useState(null);
+  const [selectedProduct, setSelectedProduct] = useState(null);
   const [selectedBlog, setSelectedBlog] = useState(null);
   const [enrolledCourses, setEnrolledCourses] = useState([]);
 
@@ -105,8 +107,15 @@ export default function App() {
   const handleNavigation = (viewId, data = null) => {
     if (viewId === 'blog-detail') {
       setSelectedBlog(data);
+      setSelectedCourse(null);
+      setSelectedProduct(null);
+    } else if (viewId === 'product-checkout') {
+      setSelectedBlog(null);
+      setSelectedCourse(null);
+      setSelectedProduct(data);
     } else {
       setSelectedBlog(null);
+      setSelectedProduct(null);
       if (data) setSelectedCourse(data);
     }
     localStorage.setItem('currentView', viewId);
@@ -183,6 +192,7 @@ export default function App() {
       case 'student-courses': return <CourseCatalog onNavigate={handleNavigation} />;
       case 'student-payments': return <PaymentPortal onNavigate={handleNavigation} course={selectedCourse} />;
       case 'student-lessons': return <LessonViewer onNavigate={handleNavigation} course={selectedCourse} />;
+      case 'product-checkout': return <ProductCheckout onNavigate={handleNavigation} product={selectedProduct} />;
       case 'student-login': return <StudentLogin onNavigate={handleNavigation} onLogin={(role, data) => handleLogin(role, data)} />;
       
       // Admin Views

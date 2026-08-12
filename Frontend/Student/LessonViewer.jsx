@@ -88,64 +88,87 @@ export default function LessonViewer({ onNavigate, course }) {
           <p className="text-gray-500 font-bold">No lessons have been added to this course yet. Check back soon!</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {/* Lesson list */}
-          <div className="md:col-span-1 space-y-2">
-            {data.lessons.map((lesson, i) => (
-              <button
-                key={lesson.id}
-                onClick={() => setActiveLessonId(lesson.id)}
-                className={`w-full text-left flex items-center gap-3 p-3 rounded-xl border transition ${
-                  activeLessonId === lesson.id ? 'bg-blue-50 border-blue-200' : 'bg-white border-gray-100 hover:bg-gray-50'
-                }`}
-              >
-                {lesson.completed
-                  ? <CheckCircle size={18} className="text-emerald-500 flex-shrink-0" />
-                  : <Circle size={18} className="text-gray-300 flex-shrink-0" />}
-                <span className="text-sm font-bold text-gray-800">{i + 1}. {lesson.title}</span>
-              </button>
-            ))}
-          </div>
+        <div className="grid grid-cols-1 lg:grid-cols-[320px_1fr] gap-6">
+          <aside className="lg:sticky lg:top-6 self-start bg-white rounded-3xl border border-gray-200 shadow-sm p-6">
+            <div className="mb-6">
+              <p className="text-xs uppercase tracking-[0.3em] text-slate-400 font-bold">Class Outline</p>
+              <h2 className="mt-3 text-xl font-black text-slate-950">{data.course.title}</h2>
+              <p className="mt-2 text-sm text-slate-500">{data.progress_percent}% complete</p>
+            </div>
 
-          {/* Active lesson content */}
-          <div className="md:col-span-2 bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+            <div className="space-y-3">
+              {data.lessons.map((lesson, i) => (
+                <button
+                  key={lesson.id}
+                  onClick={() => setActiveLessonId(lesson.id)}
+                  className={`w-full text-left rounded-3xl p-4 border transition duration-200 ${
+                    activeLessonId === lesson.id
+                      ? 'bg-blue-900 border-blue-900 text-white'
+                      : 'bg-white border-gray-200 text-slate-700 hover:border-blue-200 hover:bg-blue-50'
+                  }`}
+                >
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="text-sm font-semibold">{i + 1}. {lesson.title}</span>
+                    {lesson.completed ? (
+                      <CheckCircle size={18} className={activeLessonId === lesson.id ? 'text-white' : 'text-emerald-500'} />
+                    ) : (
+                      <Circle size={18} className={activeLessonId === lesson.id ? 'text-slate-200' : 'text-gray-300'} />
+                    )}
+                  </div>
+                  <p className="text-xs mt-2 text-slate-400">{lesson.completed ? 'Completed' : 'Pending'}</p>
+                </button>
+              ))}
+            </div>
+          </aside>
+
+          <main className="bg-white rounded-3xl border border-gray-200 shadow-sm p-8">
             {activeLesson && (
               <>
-                <h2 className="text-xl font-black text-gray-950 mb-4">{activeLesson.title}</h2>
+                <div className="mb-6">
+                  <div className="flex flex-wrap gap-2 items-center text-xs font-bold uppercase tracking-[0.3em] text-slate-400 mb-4">
+                    <span className="bg-slate-100 px-3 py-1 rounded-full">Lesson</span>
+                    <span className="bg-slate-100 px-3 py-1 rounded-full">{activeLesson.completed ? 'Completed' : 'In Progress'}</span>
+                  </div>
+                  <h2 className="text-2xl font-black text-slate-950 mb-3">{activeLesson.title}</h2>
+                  <p className="text-sm text-slate-500">{activeLesson.content?.slice(0, 120) || 'This lesson contains the next unit for your course.'}</p>
+                </div>
 
                 {activeLesson.video_url && (
-                  
+                  <a
                     href={activeLesson.video_url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-2 text-blue-600 font-bold text-sm mb-4 hover:underline"
+                    className="inline-flex items-center gap-2 text-blue-600 font-bold text-sm mb-6 hover:text-blue-800"
                   >
                     <PlayCircle size={18} /> Watch lesson video
                   </a>
                 )}
 
-                <p className="text-gray-600 leading-relaxed whitespace-pre-wrap mb-8">
-                  {activeLesson.content || 'No written content for this lesson yet.'}
-                </p>
+                <div className="rounded-3xl border border-slate-200 bg-slate-50 p-6 mb-8">
+                  <p className="text-slate-700 leading-relaxed whitespace-pre-wrap">{activeLesson.content || 'No written content for this lesson yet.'}</p>
+                </div>
 
-                <button
-                  onClick={() => toggleComplete(activeLesson.id)}
-                  disabled={toggling === activeLesson.id}
-                  className={`px-5 py-2.5 rounded-xl font-bold text-sm transition disabled:opacity-50 ${
-                    activeLesson.completed
-                      ? 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                      : 'bg-emerald-600 text-white hover:bg-emerald-700'
-                  }`}
-                >
-                  {toggling === activeLesson.id
-                    ? 'Updating...'
-                    : activeLesson.completed
-                      ? '✓ Marked Complete — Click to Undo'
-                      : 'Mark as Complete'}
-                </button>
+                <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+                  <button
+                    onClick={() => toggleComplete(activeLesson.id)}
+                    disabled={toggling === activeLesson.id}
+                    className={`w-full sm:w-auto px-6 py-3 rounded-2xl font-bold text-sm transition disabled:opacity-50 ${
+                      activeLesson.completed
+                        ? 'bg-gray-200 text-slate-700 hover:bg-gray-300'
+                        : 'bg-blue-900 text-white hover:bg-blue-800'
+                    }`}
+                  >
+                    {toggling === activeLesson.id
+                      ? 'Updating...'
+                      : activeLesson.completed
+                        ? '✓ Marked Complete — Click to Undo'
+                        : 'Mark as Complete'}
+                  </button>
+                  <div className="text-xs text-slate-500">Tip: Navigate lessons from the left menu like a learning portal.</div>
+                </div>
               </>
             )}
-          </div>
+          </main>
         </div>
       )}
     </div>

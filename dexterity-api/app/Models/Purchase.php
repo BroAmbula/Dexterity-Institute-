@@ -6,5 +6,14 @@ use Illuminate\Database\Eloquent\Model;
 
 class Purchase extends Model
 {
-    //
+    protected $fillable = [
+        'user_id',
+        'product_id',
+        'transaction_code',
+        'is_paid',
+    ];
+
+    protected $casts = [
+        'is_paid' => 'boolean',
+    ];
 }

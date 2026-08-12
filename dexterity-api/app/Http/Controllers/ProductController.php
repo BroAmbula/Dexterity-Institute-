@@ -58,7 +58,9 @@ class ProductController extends Controller
             ->where('is_paid', true)
             ->exists();
 
-        if (!$hasPurchased && auth()->user()->role !== 'super-admin') {
+        $isFreeProduct = (float) $product->price_kes === 0.0 && (float) $product->price_usd === 0.0;
+
+        if (!$hasPurchased && !$isFreeProduct && auth()->user()->role !== 'super-admin') {
             return response()->json(['message' => 'Access denied. Verified purchase required to download this asset.'], 403);
         }
 
@@ -69,6 +71,33 @@ class ProductController extends Controller
 
         return response()->download($path);
     }
+
+    public function purchase(Request $request, Product $product)
+    {
+        $isFreeProduct = (float) $product->price_kes === 0.0 && (float) $product->price_usd === 0.0;
+
+        if ($isFreeProduct) {
+            return response()->json([
+                'message' => 'Free book ready for download.',
+                'download_url' => route('product.download', ['product' => $product]),
+            ]);
+        }
+
+        $purchase = Purchase::firstOrCreate(
+            ['user_id' => auth()->id(), 'product_id' => $product->id],
+            ['is_paid' => true, 'transaction_code' => 'SIM' . strtoupper(uniqid())]
+        );
+
+        if (! $purchase->wasRecentlyCreated && ! $purchase->is_paid) {
+            $purchase->update(['is_paid' => true, 'transaction_code' => 'SIM' . strtoupper(uniqid())]);
+        }
+
+        return response()->json([
+            'message' => 'Purchase confirmed. Your download is now available.',
+            'download_url' => route('product.download', ['product' => $product]),
+        ]);
+    }
+
     public function destroy(Product $product)
     {
         if ($product->file_path) {
