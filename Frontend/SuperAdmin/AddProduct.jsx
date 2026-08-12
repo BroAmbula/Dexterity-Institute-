@@ -3,7 +3,19 @@ import API from '../axios';
 import { getApiBaseUrl } from '../apiConfig';
 
 export default function AddProduct({ onBack }) {
-  const [form, setForm] = useState({ title: '', description: '', type: 'book', price_kes: '', price_usd: '' });
+  const [form, setForm] = useState({
+    title: '',
+    description: '',
+    type: 'book',
+    price_kes: '',
+    price_usd: '',
+    author: '',
+    school: 'School of Leadership',
+    duration: '8 Weeks',
+    deliveryMode: 'Online Blended',
+    eligibility: 'Open to All',
+  });
+  const [courseOutline, setCourseOutline] = useState(['', '', '']);
   const [isFree, setIsFree] = useState(false);
   const [file, setFile] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -37,12 +49,24 @@ export default function AddProduct({ onBack }) {
     setSuccess('');
 
     const data = new FormData();
-    Object.keys(form).forEach(key => data.append(key, form[key]));
+    const description = form.type === 'course'
+      ? `${form.description}\n\nCourse Content Outline:\n${courseOutline.filter(Boolean).map((item, index) => `• Module ${index + 1}: ${item}`).join('\n')}`
+      : form.description;
+
+    Object.keys(form).forEach(key => {
+      if (key === 'description') {
+        data.append('description', description);
+      } else {
+        data.append(key, form[key]);
+      }
+    });
+
     if (isFree) {
       data.set('price_kes', '0');
       data.set('price_usd', '0');
     }
     if (file) data.append('file', file);
+    data.append('course_outline', JSON.stringify(courseOutline));
 
     try {
       await API.post('/super-admin/products', data, {
@@ -75,16 +99,38 @@ export default function AddProduct({ onBack }) {
   return (
     <div className="p-6 max-w-4xl mx-auto space-y-6 my-6">
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 text-gray-800">
-        <div className="flex justify-between items-center mb-6">
-          <div>
-            <h2 className="text-2xl font-extrabold text-gray-950">Upload Free or Paid Book / Course Bundle</h2>
-            <p className="text-xs text-gray-400 mt-1">Super admin can publish both free books and paid digital resources, including course bundles and downloadable textbooks.</p>
+<div className="flex flex-col gap-4 md:flex-row md:justify-between md:items-center mb-6">
+            <div>
+              <h2 className="text-2xl font-extrabold text-gray-950">Upload Free or Paid Book / Course Bundle</h2>
+              <p className="text-xs text-gray-400 mt-1">Super admin can publish both free books and paid digital resources, including course bundles and downloadable textbooks.</p>
+            </div>
+            {onBack && (
+              <button onClick={onBack} className="text-xs font-bold text-blue-600 hover:underline">
+                ← Back to Command Center
+              </button>
+            )}
           </div>
-          {onBack && (
-            <button onClick={onBack} className="text-xs font-bold text-blue-600 hover:underline">
-              ← Back to Command Center
-            </button>
-          )}
+
+          <div className="grid grid-cols-2 gap-3 mb-6">
+            {['book', 'course'].map((option) => (
+              <button
+                key={option}
+                type="button"
+                onClick={() => setForm({ ...form, type: option })}
+                className={`rounded-2xl px-4 py-3 text-sm font-bold transition ${
+                  form.type === option
+                    ? 'bg-blue-900 text-white'
+                    : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                }`}
+              >
+                {option === 'book' ? 'Book' : 'Course Bundle'}
+              </button>
+            ))}
+          </div>
+          <div className="mb-6 text-xs text-slate-500 rounded-2xl border border-slate-200 bg-slate-50 p-4">
+            {form.type === 'book'
+              ? 'Book uploads are for standalone downloadable publications. Use a concise title, author name, description, and a PDF/ZIP file.'
+              : 'Course bundles are for complete leadership-style programs. Add course metadata, outline the module sequence, and attach supporting materials.'}
         </div>
 
         {success && <div className="bg-emerald-50 text-emerald-700 p-3.5 rounded-xl mb-6 text-xs font-bold">✅ {success}</div>}
@@ -101,14 +147,14 @@ export default function AddProduct({ onBack }) {
                 className="h-4 w-4 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500"
               />
               <label htmlFor="freeBook" className="text-sm font-bold text-gray-700">
-                Publish as a free book
+                Publish as a free resource
               </label>
             </div>
             <div>
               <label className="text-xs font-bold text-gray-400 uppercase block mb-1">Product Title</label>
               <input 
                 type="text" 
-                placeholder="Advanced Laravel Architecture Guide"
+                placeholder={form.type === 'book' ? 'Leadership Mindset Handbook' : 'Leadership Growth Intensive'}
                 value={form.title} 
                 onChange={e => setForm({...form, title: e.target.value})} 
                 className="w-full border border-gray-200 p-3 rounded-xl text-sm font-semibold" 
@@ -116,6 +162,66 @@ export default function AddProduct({ onBack }) {
               />
             </div>
           </div>
+
+          {form.type === 'book' ? (
+            <div>
+              <label className="text-xs font-bold text-gray-400 uppercase block mb-1">Author</label>
+              <input
+                type="text"
+                placeholder="Author name"
+                value={form.author}
+                onChange={e => setForm({ ...form, author: e.target.value })}
+                className="w-full border border-gray-200 p-3 rounded-xl text-sm font-semibold"
+              />
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="text-xs font-bold text-gray-400 uppercase block mb-1">School</label>
+                <input
+                  type="text"
+                  placeholder="School of Leadership"
+                  value={form.school}
+                  onChange={e => setForm({ ...form, school: e.target.value })}
+                  className="w-full border border-gray-200 p-3 rounded-xl text-sm font-semibold"
+                  required
+                />
+              </div>
+              <div>
+                <label className="text-xs font-bold text-gray-400 uppercase block mb-1">Duration</label>
+                <input
+                  type="text"
+                  placeholder="8 Weeks"
+                  value={form.duration}
+                  onChange={e => setForm({ ...form, duration: e.target.value })}
+                  className="w-full border border-gray-200 p-3 rounded-xl text-sm font-semibold"
+                  required
+                />
+              </div>
+              <div>
+                <label className="text-xs font-bold text-gray-400 uppercase block mb-1">Delivery Mode</label>
+                <input
+                  type="text"
+                  placeholder="Online Blended"
+                  value={form.deliveryMode}
+                  onChange={e => setForm({ ...form, deliveryMode: e.target.value })}
+                  className="w-full border border-gray-200 p-3 rounded-xl text-sm font-semibold"
+                  required
+                />
+              </div>
+              <div>
+                <label className="text-xs font-bold text-gray-400 uppercase block mb-1">Eligibility</label>
+                <input
+                  type="text"
+                  placeholder="Open to All"
+                  value={form.eligibility}
+                  onChange={e => setForm({ ...form, eligibility: e.target.value })}
+                  className="w-full border border-gray-200 p-3 rounded-xl text-sm font-semibold"
+                  required
+                />
+              </div>
+            </div>
+          )}
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
@@ -158,13 +264,43 @@ export default function AddProduct({ onBack }) {
             <label className="text-xs font-bold text-gray-400 uppercase block mb-1">Description & Material Overview</label>
             <textarea 
               rows="4" 
-              placeholder="Describe what is included in this bundle..."
+              placeholder={form.type === 'book' ? 'Describe the book and what readers will learn...' : 'Describe the course bundle and what participants will achieve...'}
               value={form.description} 
               onChange={e => setForm({...form, description: e.target.value})} 
               className="w-full border border-gray-200 p-3 rounded-xl text-sm font-semibold" 
               required 
             />
           </div>
+
+          {form.type === 'course' && (
+            <div className="rounded-3xl border border-slate-200 bg-slate-50 p-5 space-y-4">
+              <div className="flex items-center justify-between gap-4">
+                <div>
+                  <p className="text-xs uppercase tracking-[0.3em] text-slate-400 font-bold">Course Content</p>
+                  <h3 className="text-sm font-black text-slate-950">Outline the leadership course modules</h3>
+                </div>
+                <span className="text-xs text-slate-500">Example: Purpose, Influence, Decision Making</span>
+              </div>
+
+              {courseOutline.map((item, index) => (
+                <div key={index} className="space-y-2">
+                  <label className="text-xs font-bold text-gray-400 uppercase block mb-1">Module {index + 1}</label>
+                  <input
+                    type="text"
+                    value={item}
+                    onChange={e => setCourseOutline(prev => {
+                      const next = [...prev];
+                      next[index] = e.target.value;
+                      return next;
+                    })}
+                    placeholder={`Leadership module ${index + 1}`}
+                    className="w-full border border-gray-200 p-3 rounded-xl text-sm font-semibold"
+                  />
+                </div>
+              ))}
+              <p className="text-xs text-slate-500">Use these fields to capture the main course sections, especially for leadership programs and course bundles.</p>
+            </div>
+          )}
 
           <button 
             type="submit" 

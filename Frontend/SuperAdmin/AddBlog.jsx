@@ -44,14 +44,10 @@ export default function AddBlog({ onBack }) {
 
     try {
       if (editingBlog) {
-        await API.patch(`/super-admin/blogs/${editingBlog.id}`, data, {
-          headers: { 'Content-Type': 'multipart/form-data' }
-        });
+        await API.patch(`/super-admin/blogs/${editingBlog.id}`, data);
         setSuccess('Blog post updated successfully!');
       } else {
-        await API.post('/super-admin/blogs', data, {
-          headers: { 'Content-Type': 'multipart/form-data' }
-        });
+        await API.post('/super-admin/blogs', data);
         setSuccess('Blog post published live successfully!');
       }
       setTitle('');
