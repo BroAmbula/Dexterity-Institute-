@@ -69,9 +69,7 @@ export default function AddProduct({ onBack }) {
     data.append('course_outline', JSON.stringify(courseOutline));
 
     try {
-      await API.post('/super-admin/products', data, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-      });
+      await API.post('/super-admin/products', data);
       setSuccess('Digital asset uploaded! Downloads will be securely gated behind payment verification.');
       setForm({ title: '', description: '', type: 'book', price_kes: '', price_usd: '' });
       setFile(null);
