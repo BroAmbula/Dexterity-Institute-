@@ -256,6 +256,12 @@ export default function AddProduct({ onBack }) {
               className="w-full border border-gray-200 p-2 rounded-xl text-sm bg-gray-50" 
               required 
             />
+            {file && (
+              <div className="mt-2 flex items-center justify-between text-xs text-slate-600">
+                <span className="truncate">{file.name}</span>
+                <button type="button" onClick={() => setFile(null)} className="text-red-600 hover:underline ml-3">Remove</button>
+              </div>
+            )}
           </div>
 
           <div>

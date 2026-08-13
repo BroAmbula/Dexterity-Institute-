@@ -71,8 +71,17 @@ export default function PaymentPortal({ onNavigate, course }) {
     }
 
     setIsProcessing(true);
+    // Add a timeout to avoid long hanging requests
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 20000);
     try {
       const token = localStorage.getItem('token') || localStorage.getItem('auth_token') || localStorage.getItem('dex_token');
+      if (!token) {
+        setError('Authentication token missing. Please login again.');
+        setIsProcessing(false);
+        return;
+      }
+
       const response = await fetch(`${getApiBaseUrl()}/api/student/pay-and-enroll`, {
         method: 'POST',
         headers: {
@@ -84,18 +93,28 @@ export default function PaymentPortal({ onNavigate, course }) {
           course_id: typeof course.id === 'string' ? course.id.replace('live-', '') : course.id,
           phone_number: formData.phone,
         }),
+        signal: controller.signal,
       });
 
-      const data = await response.json();
+      const contentType = response.headers.get('content-type') || '';
+      const data = contentType.includes('application/json') ? await response.json().catch(() => null) : null;
       if (!response.ok) {
-        throw new Error(data.message || 'Payment failed. Please try again.');
+        const msg = data?.message || `Payment failed (status ${response.status}).`;
+        throw new Error(msg);
       }
 
-      alert(data.message || 'Payment confirmed! You are now enrolled.');
+      alert(data?.message || 'Payment confirmed! You are now enrolled.');
       onNavigate('student-dashboard');
     } catch (err) {
-      setError(err.message);
+      if (err.name === 'AbortError') {
+        setError('Payment request timed out. Please try again.');
+      } else if (err.message && err.message.toLowerCase().includes('failed to fetch')) {
+        setError('Network error: could not reach the API. Check your connection or API url.');
+      } else {
+        setError(err.message || 'Payment failed.');
+      }
     } finally {
+      clearTimeout(timeout);
       setIsProcessing(false);
     }
   };

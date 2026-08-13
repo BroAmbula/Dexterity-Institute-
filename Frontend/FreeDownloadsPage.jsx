@@ -36,26 +36,44 @@ export default function FreeDownloadsPage() {
       setStatus({ type: 'error', message: 'Please select a document first.' });
       return;
     }
+    if (!email || !/^\S+@\S+\.\S+$/.test(email)) {
+      setStatus({ type: 'error', message: 'Please enter a valid email address.' });
+      return;
+    }
+
     setSending(true);
     setStatus({ type: '', message: '' });
+
+    // Abort fetch if it takes too long
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 15000);
 
     try {
       const response = await fetch(`${getApiBaseUrl()}/api/free-downloads/send`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
         body: JSON.stringify({ email, download_id: selectedId }),
+        signal: controller.signal,
       });
 
-      const result = await response.json();
+      const contentType = response.headers.get('content-type') || '';
+      const result = contentType.includes('application/json') ? await response.json().catch(() => null) : null;
+
       if (!response.ok) {
-        throw new Error(result.message || 'Could not send the download email.');
+        const msg = result?.message || `Server returned ${response.status}`;
+        throw new Error(msg);
       }
 
-      setStatus({ type: 'success', message: result.message });
+      setStatus({ type: 'success', message: result?.message || 'Email sent. Check your inbox.' });
       setEmail('');
     } catch (err) {
-      setStatus({ type: 'error', message: err.message || 'Unable to send email.' });
+      if (err.name === 'AbortError') {
+        setStatus({ type: 'error', message: 'Request timed out. Please try again.' });
+      } else {
+        setStatus({ type: 'error', message: err.message || 'Unable to send email.' });
+      }
     } finally {
+      clearTimeout(timeout);
       setSending(false);
     }
   };
