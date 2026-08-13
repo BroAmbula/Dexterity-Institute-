@@ -17,7 +17,13 @@ return [
 
     'allowed_methods' => ['*'],
 
-    'allowed_origins' => ['https://dexterity-institute-1.onrender.com'],
+    // Allow local development origins in addition to the deployed site.
+    'allowed_origins' => [
+        env('FRONTEND_URL', 'http://localhost:5173'),
+        'http://localhost:3000',
+        'http://127.0.0.1:5173',
+        'https://dexterity-institute-1.onrender.com',
+    ],
 
     'allowed_origins_patterns' => [],
 
