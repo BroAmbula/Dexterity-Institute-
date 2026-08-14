@@ -3,6 +3,9 @@
 namespace App\Mail;
 
 use Illuminate\Mail\Mailable;
+use Illuminate\Contracts\Queue\ShouldQueue;
+
+class FreeDownloadMail extends Mailable implements ShouldQueue
 
 class FreeDownloadMail extends Mailable
 {

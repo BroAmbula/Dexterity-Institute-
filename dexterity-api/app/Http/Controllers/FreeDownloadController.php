@@ -52,7 +52,16 @@ class FreeDownloadController extends Controller
             ]);
         }
 
-        Mail::to($request->input('email'))->send($mail);
+        try {
+            Mail::to($request->input('email'))->queue($mail);
+        } catch (\Exception $e) {
+            // Fallback to synchronous send if queueing fails
+            try {
+                Mail::to($request->input('email'))->send($mail);
+            } catch (\Exception $e) {
+                // swallow
+            }
+        }
 
         // Log the free download request for reporting
         try {

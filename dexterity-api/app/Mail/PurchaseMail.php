@@ -3,6 +3,9 @@
 namespace App\Mail;
 
 use Illuminate\Mail\Mailable;
+use Illuminate\Contracts\Queue\ShouldQueue;
+
+class PurchaseMail extends Mailable implements ShouldQueue
 
 class PurchaseMail extends Mailable
 {

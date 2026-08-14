@@ -113,7 +113,16 @@ class ProductController extends Controller
                 ]);
             }
 
-            Mail::to(auth()->user()->email)->send($mailable);
+            try {
+                Mail::to(auth()->user()->email)->queue($mailable);
+            } catch (\Exception $e) {
+                // Fallback to synchronous send if queueing fails
+                try {
+                    Mail::to(auth()->user()->email)->send($mailable);
+                } catch (\Exception $e) {
+                    // swallow
+                }
+            }
         } catch (\Exception $e) {
             // Do not fail the purchase flow if email sending fails
         }
