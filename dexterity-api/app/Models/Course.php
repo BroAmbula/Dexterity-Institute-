@@ -17,4 +17,9 @@ class Course extends Model
         'exchange_rate',
         'is_active',
     ];
+
+    public function lessons()
+    {
+        return $this->hasMany(Lesson::class)->orderBy('sort_order');
+    }
 }

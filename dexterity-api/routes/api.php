@@ -42,8 +42,10 @@ Route::middleware('auth:sanctum')->group(function () {
 Route::middleware('auth:sanctum')->prefix('student')->group(function () {
     Route::get('/my-tracks', [StudentDashboardController::class, 'getMyTracks']);
     Route::get('/active-courses', [EnrollmentApplicationController::class, 'activeCourses']);
+    Route::get('/courses/{course}/lessons', [App\Http\Controllers\Student\StudentLessonController::class, 'lessons']);
     Route::post('/apply', [EnrollmentApplicationController::class, 'apply']);
     Route::post('/pay-and-enroll', [PaymentController::class, 'confirmPayment']);
+    Route::post('/lessons/{lesson}/toggle-complete', [App\Http\Controllers\Student\StudentLessonController::class, 'toggleComplete']);
 });
 
 // ==========================================

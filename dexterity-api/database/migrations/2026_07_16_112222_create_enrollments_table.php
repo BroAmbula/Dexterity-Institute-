@@ -13,7 +13,13 @@ return new class extends Migration
     {
         Schema::create('enrollments', function (Blueprint $table) {
             $table->id();
+            $table->unsignedBigInteger('user_id')->nullable()->index();
+            $table->unsignedBigInteger('course_id')->nullable()->index();
+            $table->string('status')->default('pending');
+            $table->string('payment_status')->default('unpaid');
             $table->timestamps();
+
+            $table->unique(['user_id', 'course_id']);
         });
     }
 
