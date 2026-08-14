@@ -7,6 +7,8 @@ use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\Enrollment;
 use App\Models\Course;
+use App\Models\Purchase;
+use App\Models\FreeDownloadLog;
 use Illuminate\Support\Facades\Hash;
 
 class SuperAdminDashboardController extends Controller
@@ -88,6 +90,18 @@ class SuperAdminDashboardController extends Controller
     {
         $enrollments = Enrollment::where('status', 'pending')->get();
         return response()->json($enrollments);
+    }
+
+    public function allDownloads()
+    {
+        $logs = FreeDownloadLog::latest()->paginate(50);
+        return response()->json($logs);
+    }
+
+    public function allPurchases()
+    {
+        $purchases = Purchase::latest()->with('user')->paginate(50);
+        return response()->json($purchases);
     }
 
     public function updateEnrollmentStatus(Request $request, $id)

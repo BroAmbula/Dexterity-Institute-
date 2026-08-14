@@ -27,6 +27,7 @@ Route::post('/login', [AuthController::class, 'login']);
 // Public content feeds for the main marketing site
 Route::get('/blogs', [BlogController::class, 'index']);
 Route::get('/products', [ProductController::class, 'index']);
+Route::post('/products/{product}/purchase', [ProductController::class, 'purchase']);
 Route::get('/courses', [CourseController::class, 'index']);
 Route::get('/free-downloads', [FreeDownloadController::class, 'index']);
 Route::post('/free-downloads/send', [FreeDownloadController::class, 'send']);
@@ -87,10 +88,12 @@ Route::middleware(['auth:sanctum', 'super-admin'])->prefix('super-admin')->group
     Route::delete('/blogs/{blog}', [BlogController::class, 'destroy']);
     Route::post('/products', [ProductController::class, 'store']);
     Route::delete('/products/{product}', [ProductController::class, 'destroy']);
+    Route::get('/downloads', [SuperAdminDashboardController::class, 'allDownloads']);
+    Route::get('/purchases', [SuperAdminDashboardController::class, 'allPurchases']);
     // --- ENROLLMENT & APPLICATION APPROVAL ---
     Route::get('/enrollments', [AdminEnrollmentController::class, 'index']);
     Route::patch('/enrollments/{enrollment}/status', [AdminEnrollmentController::class, 'updateStatus']);
 });
 
 // Secure Download Route for Paid Users / Instructors
-Route::middleware(['auth:sanctum'])->get('/download/{product}', [ProductController::class, 'download']);
+Route::middleware(['auth:sanctum'])->get('/download/{product}', [ProductController::class, 'download'])->name('product.download');

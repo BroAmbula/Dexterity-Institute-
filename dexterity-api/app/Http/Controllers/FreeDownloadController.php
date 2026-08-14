@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\FreeDownloadMail;
+use App\Models\FreeDownloadLog;
 
 class FreeDownloadController extends Controller
 {
@@ -52,6 +53,19 @@ class FreeDownloadController extends Controller
         }
 
         Mail::to($request->input('email'))->send($mail);
+
+        // Log the free download request for reporting
+        try {
+            FreeDownloadLog::create([
+                'download_id' => $download['id'],
+                'email' => $request->input('email'),
+                'user_id' => optional($request->user())->id,
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->header('User-Agent'),
+            ]);
+        } catch (\Exception $e) {
+            // Don't fail the request if logging fails
+        }
 
         return response()->json([
             'message' => 'Thanks! The download link has been sent to your email.',

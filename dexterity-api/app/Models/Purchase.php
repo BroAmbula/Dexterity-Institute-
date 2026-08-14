@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\User;
 
 class Purchase extends Model
 {
@@ -16,4 +17,9 @@ class Purchase extends Model
     protected $casts = [
         'is_paid' => 'boolean',
     ];
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 }

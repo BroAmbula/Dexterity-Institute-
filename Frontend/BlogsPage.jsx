@@ -155,7 +155,7 @@ export default function BlogsPage({ onNavigate }) {
                   </div>
                   <button
                     type="button"
-                    onClick={() => onNavigate('product-checkout', product)}
+                    onClick={() => onNavigate(product.price_kes === 0 && product.price_usd === 0 ? 'free-downloads' : 'product-checkout', product)}
                     className={`w-full rounded-2xl px-4 py-3 text-sm font-bold transition ${
                       product.price_kes === 0 && product.price_usd === 0
                         ? 'bg-emerald-600 text-white hover:bg-emerald-700'

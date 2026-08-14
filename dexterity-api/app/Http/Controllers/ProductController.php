@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Product;
 use App\Models\Purchase;
+use App\Mail\PurchaseMail;
+use Illuminate\Support\Facades\Mail;
 
 class ProductController extends Controller
 {
@@ -92,9 +94,33 @@ class ProductController extends Controller
             $purchase->update(['is_paid' => true, 'transaction_code' => 'SIM' . strtoupper(uniqid())]);
         }
 
+        // Prepare download URL and send purchase email
+        $downloadUrl = route('product.download', ['product' => $product]);
+        $mailPayload = [
+            'id' => $product->id,
+            'title' => $product->title,
+            'description' => $product->description,
+        ];
+
+        try {
+            $mailable = new PurchaseMail($mailPayload, $downloadUrl);
+
+            $storagePath = storage_path('app/public/' . $product->file_path);
+            if (file_exists($storagePath)) {
+                $mailable->attach($storagePath, [
+                    'as' => $product->title . '.pdf',
+                    'mime' => 'application/pdf',
+                ]);
+            }
+
+            Mail::to(auth()->user()->email)->send($mailable);
+        } catch (\Exception $e) {
+            // Do not fail the purchase flow if email sending fails
+        }
+
         return response()->json([
-            'message' => 'Purchase confirmed. Your download is now available.',
-            'download_url' => route('product.download', ['product' => $product]),
+            'message' => 'Purchase confirmed. Your download is now available and has been emailed to you.',
+            'download_url' => $downloadUrl,
         ]);
     }
 
