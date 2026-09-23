@@ -8,5 +8,5 @@ echo "Caching config/routes..."
 php artisan config:cache || true
 php artisan route:cache || true
 
-echo "Starting server on port ${PORT}..."
-exec php -S 0.0.0.0:"$PORT" -t public
+echo "Starting Laravel server on port ${PORT:-8080}..."
+exec php artisan serve --host=0.0.0.0 --port="${PORT:-8080}"

@@ -1,4 +1,4 @@
-const DEFAULT_API_BASE_URL = 'https://dexterity-institute-production.up.railway.app';
+const DEFAULT_API_BASE_URL = 'https://dexterity-api.onrender.com';
 const configuredApiBaseUrl = import.meta.env.VITE_API_BASE_URL?.trim();
 
 const isValidApiBaseUrl = (value) => {

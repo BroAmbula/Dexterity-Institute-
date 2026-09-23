@@ -1,0 +1,26 @@
+services:
+  - type: web
+    name: dexterity-api
+    runtime: docker
+    plan: free
+    rootDir: dexterity-api
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    healthCheckPath: /
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: APP_DEBUG
+        value: "false"
+      - key: APP_KEY
+        generateValue: true
+      - key: APP_URL
+        value: https://dexterity-api.onrender.com
+      - key: FRONTEND_URL
+        value: https://www.dexterity.org
+      - key: DB_CONNECTION
+        value: pgsql
+      - key: DB_URL
+        sync: false
+      - key: LOG_CHANNEL
+        value: stderr

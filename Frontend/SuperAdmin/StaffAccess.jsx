@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { getApiBaseUrl } from '../apiConfig';
 
 export default function ConfigureStaffModal() {
   const [name, setName] = useState('');
@@ -15,7 +16,7 @@ export default function ConfigureStaffModal() {
     const token = localStorage.getItem('token') || localStorage.getItem('dex_token');
     
     try {
-      const response = await fetch('https://dexterity-institute-production.up.railway.app/api/super-admin/create-admin', {
+      const response = await fetch(`${getApiBaseUrl()}/api/super-admin/create-admin`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
