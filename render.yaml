@@ -17,7 +17,7 @@ services:
       - key: APP_URL
         value: https://dexterity-api.onrender.com
       - key: FRONTEND_URL
-        value: https://www.dexterity.org
+        value: https://www.dexteritylifeskills.org
       - key: DB_CONNECTION
         value: pgsql
       - key: DB_URL

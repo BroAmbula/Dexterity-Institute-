@@ -23,7 +23,7 @@ return [
         'http://localhost:3000',
         'http://127.0.0.1:5173',
         'https://dexterity-institute-1.onrender.com',
-        'https://www.dexterity.org',
+        'https://www.dexteritylifeskills.org',
     ],
 
     'allowed_origins_patterns' => [],
